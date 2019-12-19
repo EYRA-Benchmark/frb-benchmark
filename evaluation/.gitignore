@@ -1,0 +1,10 @@
+build
+*info
+*.npy
+*.hdf5
+*.fil
+*.py~
+*.pyc
+*dist
+*pdf
+.idea/

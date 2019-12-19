@@ -1,0 +1,651 @@
+##
+# @package py_astro_accelerate py_astro_accelerate.py
+#
+#
+import sys
+
+if (sys.version_info < (3, 0)):
+    print("ERROR: Python version less than 3.0. Exiting...")
+    sys.exit()
+
+import ctypes
+import numpy as np
+
+lib = ctypes.CDLL('libastroaccelerate.so')
+
+# Define ctypes for float pointers
+FLOAT = ctypes.c_float
+PFLOAT = ctypes.POINTER(FLOAT)
+PPFLOAT = ctypes.POINTER(PFLOAT)
+PPPFLOAT = ctypes.POINTER(PPFLOAT)
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+##
+# \brief Python class to hold filterbank_metadata.
+# \details Please see include/aa_filterbank_metadata.hpp for library implementation.
+# \author AstroAccelerate.
+# \date 05 February 2019.
+
+class analysis_pulse(ctypes.Structure):
+    _fields_ = [
+        ("dispersion_measure", ctypes.c_float),
+        ("time", ctypes.c_float),
+        ("snr", ctypes.c_float),
+        ("pulse_width", ctypes.c_float)
+    ]
+
+
+class analysis_output(ctypes.Structure):
+    _fields_ = [
+        ("pulses", analysis_pulse),
+        ("dm_low", ctypes.c_float),
+        ("dm_high", ctypes.c_float),
+    ]
+
+
+#
+class filterbank_metadata_struct(ctypes.Structure):
+    _fields_ = [
+        ("m_tstart", ctypes.c_double),
+        ("m_tsamp", ctypes.c_double),
+        ("m_fch1", ctypes.c_double),
+        ("m_foff", ctypes.c_double),
+        ("m_nbits", ctypes.c_int),
+        ("m_nsamples", ctypes.c_int),
+        ("m_nchans", ctypes.c_int),
+        ("m_src_raj", ctypes.c_double)
+    ]
+
+
+##
+# \brief Python class that reads a sigproc file.
+# \details Please see include/aa_sigproc_input.hpp for library implementation.
+# \author AstroAccelerate.
+# \date 05 February 2019.
+#
+class aa_py_sigproc_input:
+    def __init__(self, path: str):
+        lib.aa_py_sigproc_input.argtypes = [ctypes.c_char_p]
+        lib.aa_py_sigproc_input.restype = ctypes.c_void_p
+        c_string = ctypes.c_char_p(path.encode('utf-8'))
+        self.m_obj = lib.aa_py_sigproc_input(c_string)
+
+        print("Constructed aa_py_sigproc_input")
+        # Call into library to construct object, and get the metadata and input data
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Destructed aa_py_sigproc_input")
+
+    def read_metadata(self):
+        lib.aa_py_sigproc_input_read_metadata.argtypes = [ctypes.c_void_p]
+        lib.aa_py_sigproc_input_read_metadata.restype = filterbank_metadata_struct
+        return lib.aa_py_sigproc_input_read_metadata(self.m_obj)
+        print("Read metadata")
+        # Call into library to get filterbank_metadata.
+
+    def read_signal(self):
+        lib.aa_py_sigproc_input_read_signal.argtypes = [ctypes.c_void_p]
+        lib.aa_py_sigproc_input_read_signal.restype = ctypes.c_bool
+        return lib.aa_py_sigproc_input_read_signal(self.m_obj)
+
+    def input_buffer(self):
+        lib.aa_py_sigproc_input_input_buffer.argtypes = [ctypes.c_void_p]
+        lib.aa_py_sigproc_input_input_buffer.restype = ctypes.POINTER(ctypes.c_ushort)
+        return lib.aa_py_sigproc_input_input_buffer(self.m_obj)
+
+
+##
+# \brief Python class for creating a filterbank_metadata object.
+# \details Please see include/aa_filterbank_metadata.hpp for library implementation.
+# \author AstroAccelerate.
+# \date 05 February 2019.
+#
+class aa_py_filterbank_metadata:
+    def __init__(self, tstart: float, tsamp: float, nbits: int, nsamples: int, fch1: float, foff: float, nchans: int,
+                 src_raj: float):
+        self.m_tstart = tstart
+        self.m_tsamp = tsamp
+        self.m_nbits = nbits
+        self.m_nsamples = nsamples
+        self.m_fch1 = fch1
+        self.m_foff = foff
+        self.m_nchans = nchans
+        self.m_src_raj = src_raj
+        lib.aa_py_filterbank_metadata.argtypes = []
+        lib.aa_py_filterbank_metadata.restype = ctypes.c_void_p
+        self.m_obj = lib.aa_py_filterbank_metadata(ctypes.c_double(self.m_tstart), ctypes.c_double(self.m_tsamp),
+                                                   ctypes.c_int(self.m_nbits), ctypes.c_int(self.m_nsamples),
+                                                   ctypes.c_double(self.m_fch1), ctypes.c_double(self.m_foff),
+                                                   ctypes.c_int(self.m_nchans), ctypes.c_double(self.m_src_raj))
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        lib.aa_py_filterbank_metadata_delete.argtypes = [ctypes.c_void_p]
+        lib.aa_py_filterbank_metadata_delete(self.m_obj)
+        print("Destructed aa_py_filterbank_metadata")
+
+    def __enter__(self):
+        return self
+
+    def pointer(self):
+        return self.m_obj
+
+    def tstart(self):
+        lib.aa_py_filterbank_metadata_tstart.argtypes = [ctypes.c_void_p]
+        lib.aa_py_filterbank_metadata_tstart.restype = ctypes.c_double
+        self.m_tstart = ctypes.c_double(lib.aa_py_filterbank_metadata_tstart(self.m_obj)).value
+        return self.m_tstart
+
+
+##
+# \brief Python class for creating dm settings that can be added to an aa_py_ddtr_plan.
+# \details Please see include/aa_ddtr_plan.hpp `struct dm` for library implementation.
+# \author AstroAccelerate.
+# \date 05 February 2019.
+#
+class aa_py_dm:
+    def __init__(self, low: float, high: float, step: float, inBin: int, outBin: int):
+        self.m_low = low
+        self.m_high = high
+        self.m_step = step
+        self.m_inBin = inBin
+        self.m_outBin = outBin
+
+    def low(self):
+        return self.m_low
+
+    def high(self):
+        return self.m_high
+
+    def step(self):
+        return self.m_step
+
+    def inBin(self):
+        return self.m_inBin
+
+    def outBin(self):
+        return self.m_outBin
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Destructed aa_py_dm")
+
+
+##
+# \brief Python class for creating a ddtr_plan.
+# \details Please see include/aa_ddtr_plan for library implementation.
+# \author AstroAccelerate.
+# \date 05 February 2019.
+#
+class aa_py_ddtr_plan:
+    def __init__(self, dm: np.array):
+        lib.aa_py_ddtr_plan.argtypes = []
+        lib.aa_py_ddtr_plan.restype = ctypes.c_void_p
+        self.m_obj = lib.aa_py_ddtr_plan()
+
+        lib.aa_py_ddtr_plan_add_dm.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float,
+                                               ctypes.c_int, ctypes.c_int]
+        lib.aa_py_ddtr_plan_add_dm.restype = ctypes.c_bool
+        self.m_power = 0.0
+        self.m_set_enable_msd_baseline_noise = False
+
+        if (dm.size):
+            if (type(dm[0]) is not aa_py_dm):
+                print("ERROR: Supplied dm is the wrong type, {}".format(type(dm[0]).__name__))
+            else:
+                self.m_dm = dm
+                for dm in self.m_dm:
+                    lib.aa_py_ddtr_plan_add_dm(self.m_obj, ctypes.c_float(dm.low()), ctypes.c_float(dm.high()),
+                                               ctypes.c_float(dm.step()), ctypes.c_int(dm.inBin()),
+                                               ctypes.c_int(dm.outBin()))
+        else:
+            print("ERROR: The array is empty.")
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        lib.aa_py_ddtr_plan_delete.argtypes = [ctypes.c_void_p]
+        lib.aa_py_ddtr_plan_delete(self.m_obj)
+        print("Destructed aa_py_ddtr_plan")
+
+    def __enter__(self):
+        return self
+
+    def pointer(self):
+        return self.m_obj
+
+    def set_power(self, power: float):
+        lib.aa_py_ddtr_plan_set_power.argtypes = [ctypes.c_void_p, ctypes.c_float]
+        lib.aa_py_ddtr_plan_set_power.restype = ctypes.c_bool
+        self.m_power = power
+        return lib.aa_py_ddtr_plan_set_power(self.m_obj, ctypes.c_float(self.m_power))
+
+    def power(self):
+        lib.aa_py_ddtr_plan_power.argtypes = [ctypes.c_void_p]
+        lib.aa_py_ddtr_plan_power.restype = ctypes.c_float
+        self.m_power = ctypes.c_float(lib.aa_py_ddtr_plan_power(self.m_obj)).value
+        return self.m_power
+
+    def set_enable_msd_baseline_noise(self, enable_msd_baseline_noise: bool):
+        lib.aa_py_ddtr_plan_set_enable_msd_baseline.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        lib.aa_py_ddtr_plan_set_enable_msd_baseline.restype = ctypes.c_bool
+        self.m_set_enable_msd_baseline_noise = enable_msd_baseline_noise
+        return lib.aa_py_ddtr_plan_set_enable_msd_baseline(self.m_obj,
+                                                           ctypes.c_bool(self.m_set_enable_msd_baseline_noise))
+
+    def enable_msd_baseline_noise(self):
+        lib.aa_py_ddtr_plan_enable_msd_baseline_noise.argtypes = [ctypes.c_void_p]
+        lib.aa_py_ddtr_plan_enable_msd_baseline_noise.restype = ctypes.c_bool
+        self.m_set_enable_msd_baseline_noise = ctypes.c_float(lib.aa_py_ddtr_plan_enable_msd_baseline_noise).value
+        return self.m_enable_msd_baseline_noise
+
+    def print_info(self):
+        print("AA_PY_DDTR_PLAN INFORMATION:")
+        if (self.m_dm.size):
+            for i in range(self.m_dm.size):
+                print("     aa_py_ddtr_plan range {}: low {}, high {}, step {}, inBin {}, outBin {}".format(i,
+                                                                                                            self.m_dm[
+                                                                                                                i].m_low,
+                                                                                                            self.m_dm[
+                                                                                                                i].m_high,
+                                                                                                            self.m_dm[
+                                                                                                                i].m_step,
+                                                                                                            self.m_dm[
+                                                                                                                i].m_inBin,
+                                                                                                            self.m_dm[
+                                                                                                                i].m_outBin))
+        else:
+            print("No dm ranges have been provided.")
+        print("     aa_py_ddtr_plan power {}".format(self.m_power))
+        print("     aa_py_ddtr_plan enable_msd_baseline_noise: {}".format(self.m_set_enable_msd_baseline_noise))
+
+
+##
+# \brief Class for configuring an analysis_plan.
+# \details Please see include/aa_analysis_plan.hpp for library implementation.
+# \author AstroAccelerate.
+# \date 05 February 2019.
+#
+class aa_py_analysis_plan():
+    def __init__(self, sigma_cutoff: float, sigma_constant: float, max_boxcar_width_in_sec: float,
+                 candidate_algorithm: int, enable_msd_baseline_noise: bool):
+        self.m_sigma_cutoff = sigma_cutoff
+        self.m_sigma_constant = sigma_constant
+        self.m_max_boxcar_width_in_sec = max_boxcar_width_in_sec
+        self.m_candidate_algorithm = candidate_algorithm
+        self.m_enable_msd_baseline_noise = enable_msd_baseline_noise
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Destructed aa_py_analysis_plan")
+
+    def __enter__(self):
+        return self
+
+    def sigma_cutoff(self):
+        return self.m_sigma_cutoff
+
+    def sigma_constant(self):
+        return self.m_sigma_constant
+
+    def max_boxcar_width_in_sec(self):
+        return self.m_max_boxcar_width_in_sec
+
+    def candidate_algorithm(self):
+        return self.m_candidate_algorithm
+
+    def enable_msd_baseline_noise(self):
+        return self.m_enable_msd_baseline_noise
+
+    def print_info(self):
+        print("AA_PY_ANALYSIS_PLAN INFORMATION:")
+        print("     aa_py_analysis_plan sigma_cutoff {}".format(self.m_sigma_cutoff))
+        print("     aa_py_analysis_plan sigma_constant {}".format(self.m_sigma_constant))
+        print("     aa_py_analysis_plan max_boxcar_width_in_sec {}".format(self.m_max_boxcar_width_in_sec))
+        print("     aa_py_analysis_plan candidate_algorithm {}".format(self.m_candidate_algorithm))
+        print("     aa_py_analysis_plan enable_msd_baseline_noise {}".format(self.m_enable_msd_baseline_noise))
+
+
+##
+# \brief Class for configuring a periodicity_plan.
+# \details Please see include/aa_periodicity_plan.hpp for library implementation.
+# \author AstroAccelerate.
+# \date 05 February 2019.
+#
+class aa_py_periodicity_plan():
+    def __init__(self, sigma_cutoff: float, sigma_constant: float, nHarmonics: int, export_powers: int,
+                 candidate_algorithm: bool, enable_msd_baseline_noise: bool):
+        self.m_sigma_cutoff = sigma_cutoff
+        self.m_sigma_constant = sigma_constant
+        self.m_nHarmonics = nHarmonics
+        self.m_export_powers = export_powers
+        self.m_candidate_algorithm = candidate_algorithm
+        self.m_enable_msd_baseline_noise = enable_msd_baseline_noise
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Destructed aa_py_periodicity_plan")
+
+    def sigma_cutoff(self):
+        return self.m_sigma_cutoff
+
+    def sigma_constant(self):
+        return self.m_sigma_constant
+
+    def nHarmonics(self):
+        return self.m_nHarmonics
+
+    def export_powers(self):
+        return self.m_export_powers
+
+    def candidate_algorithm(self):
+        return self.m_candidate_algorithm
+
+    def enable_msd_baseline_noise(self):
+        return self.m_enable_msd_baseline_noise
+
+
+##
+# \brief Class for configuring an fdas_plan.
+# \details Please see include/aa_fdas_plan.hpp for library implementation.
+# \author AstroAccelerate.
+# \date 05 February 2019.
+#
+class aa_py_fdas_plan():
+    def __init__(self, sigma_cutoff: float, sigma_constant: float, enable_msd_baseline_noise: bool):
+        self.m_sigma_cutoff = sigma_cutoff
+        self.m_sigma_constant = sigma_constant
+        self.m_enable_msd_baseline_noise = enable_msd_baseline_noise
+
+    def sigma_cutoff(self):
+        return self.m_sigma_cutoff
+
+    def sigma_constant(self):
+        return self.m_sigma_constant
+
+    def enable_msd_baseline_noise(self):
+        return self.m_enable_msd_baseline_noise
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Destructed aa_pu_fdas_plan")
+
+
+##
+# \brief Class for configuring an fdas_strategy.
+# \details Please see include/aa_fdas_strategy.hpp for library implementation.
+# \author AstroAccelerate.
+# \date 05 February 2019.
+#
+class fdas_strategy_struct(ctypes.Structure):
+    _fields_ = [
+        ("m_sigma_cutoff", ctypes.c_float),
+        ("m_sigma_constant", ctypes.c_float),
+        ("m_enable_msd_baseline_noise", ctypes.c_bool),
+        ("m_ready", ctypes.c_bool)
+    ]
+
+
+##
+# \brief Structure to make pipeline object from pipeline components
+# \details Set flags to select a pipeline from the library.
+# \author AstroAccelerate.
+# \date 12 February 2019.
+#
+class aa_py_pipeline_components(ctypes.Structure):
+    _fields_ = [
+        ("dedispersion", ctypes.c_bool),
+        ("analysis", ctypes.c_bool),
+        ("periodicity", ctypes.c_bool),
+        ("fdas", ctypes.c_bool)
+    ]
+
+
+##
+# \brief Structure to make pipeline component settings object from pipeline component options
+# \details Set flags to select a pipeline option from the library.
+# \author AstroAccelerate.
+# \date 12 February 2019.
+#
+class aa_py_pipeline_component_options(ctypes.Structure):
+    _fields_ = [
+        ("zero_dm", ctypes.c_bool),
+        ("zero_dm_with_outliers", ctypes.c_bool),
+        ("old_rfi", ctypes.c_bool),
+        ("copy_ddtr_data_to_host", ctypes.c_bool),
+        ("msd_baseline_noise", ctypes.c_bool),
+        ("output_dmt", ctypes.c_bool),
+        ("output_ffdot_plan", ctypes.c_bool),
+        ("output_fdas_list", ctypes.c_bool),
+        ("candidate_algorithm", ctypes.c_int),
+        ("fdas_custom_fft", ctypes.c_bool),
+        ("fdas_inbin", ctypes.c_bool),
+        ("fdas_norm", ctypes.c_bool)
+    ]
+
+
+##
+# \brief Class for interacting with aa_pipeline_api objects from the library.
+# \details Please see include/aa_pipeline_api.hpp for library implementation.
+# \author AstroAccelerate.
+# \date 05 February 2019.
+#
+class aa_py_pipeline():
+    def __init__(self, pipeline: aa_py_pipeline_components, pipeline_options: aa_py_pipeline_component_options,
+                 metadata: filterbank_metadata_struct, input_data: ctypes.POINTER(ctypes.c_ushort), card_number: int):
+        lib.aa_py_pipeline_api.argtypes = [aa_py_pipeline_components, aa_py_pipeline_component_options,
+                                           filterbank_metadata_struct, ctypes.POINTER(ctypes.c_ushort), ctypes.c_int]
+        lib.aa_py_pipeline_api.restype = ctypes.c_void_p
+        self.m_obj = lib.aa_py_pipeline_api(pipeline, pipeline_options, metadata, input_data, ctypes.c_int(card_number))
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Destructed aa_py_pipeline")
+
+    def __enter__(self):
+        return self
+
+    def bind_ddtr_plan(self, plan: aa_py_ddtr_plan):
+        lib.aa_py_pipeline_api_bind_ddtr_plan.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+        lib.aa_py_pipeline_api_bind_ddtr_plan.restype = ctypes.c_bool
+        return lib.aa_py_pipeline_api_bind_ddtr_plan(self.m_obj, ctypes.c_void_p(plan.pointer()))
+        # Call into library to bind plan
+
+    def ddtr_strategy(self):
+        lib.aa_py_pipeline_api_ddtr_strategy.argtypes = [ctypes.c_void_p]
+        lib.aa_py_pipeline_api_ddtr_strategy.restype = ctypes.c_void_p
+        return lib.aa_py_pipeline_api_ddtr_strategy(self.m_obj)
+        print("ddtr_strategy")
+
+    def ddtr_range(self):
+        lib.aa_py_get_ddtr_nRanges.argtypes = [ctypes.c_void_p]
+        lib.aa_py_get_ddtr_nRanges.restype = ctypes.c_size_t
+        print("range")
+        return lib.aa_py_get_ddtr_nRanges(self.m_obj)
+
+    def ddtr_ndms(self):
+        #        lib.aa_py_ndms.argtypes = [ctypes.c_void_p]
+        lib.aa_py_get_ndms_array.restype = ctypes.POINTER(ctypes.c_int)
+        return lib.aa_py_get_ndms_array(self.m_obj)
+
+    def bind_analysis_plan(self, plan: aa_py_analysis_plan):
+        lib.aa_py_pipeline_api_ddtr_strategy.argtypes = [ctypes.c_void_p]
+        lib.aa_py_pipeline_api_ddtr_strategy.restype = ctypes.c_void_p
+        self.m_ddtr_strategy = lib.aa_py_pipeline_api_ddtr_strategy(self.m_obj)
+
+        lib.aa_py_analysis_plan.argtypes = [ctypes.c_void_p,
+                                            ctypes.c_float,
+                                            ctypes.c_float,
+                                            ctypes.c_float,
+                                            ctypes.c_int,
+                                            ctypes.c_bool]
+        lib.aa_py_analysis_plan.restype = ctypes.c_void_p
+        self.m_analysis_plan_ptr = lib.aa_py_analysis_plan(self.m_ddtr_strategy,
+                                                           ctypes.c_float(plan.sigma_cutoff()),
+                                                           ctypes.c_float(plan.sigma_constant()),
+                                                           ctypes.c_float(plan.max_boxcar_width_in_sec()),
+                                                           ctypes.c_int(plan.candidate_algorithm()),
+                                                           ctypes.c_bool(plan.enable_msd_baseline_noise()))
+
+        lib.aa_py_pipeline_api_bind_analysis_plan.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+        lib.aa_py_pipeline_api_bind_analysis_plan.restype = ctypes.c_bool
+
+        # Now delete the memory
+        lib.aa_py_ddtr_strategy_delete.argtypes = [ctypes.c_void_p]
+        lib.aa_py_ddtr_strategy_delete(self.m_ddtr_strategy)
+
+        return lib.aa_py_pipeline_api_bind_analysis_plan(self.m_obj, self.m_analysis_plan_ptr)
+
+    def bind_periodicity_plan(self, plan: aa_py_periodicity_plan):
+        lib.aa_py_pipeline_api_bind_periodicity_plan.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float,
+                                                                 ctypes.c_int, ctypes.c_int, ctypes.c_bool,
+                                                                 ctypes.c_bool]
+        lib.aa_py_pipeline_api_bind_periodicity_plan.restype = ctypes.c_bool
+        return lib.aa_py_pipeline_api_bind_periodicity_plan(self.m_obj, ctypes.c_float(plan.sigma_cutoff()),
+                                                            ctypes.c_float(plan.sigma_constant()),
+                                                            ctypes.c_int(plan.nHarmonics()),
+                                                            ctypes.c_int(plan.export_powers()),
+                                                            ctypes.c_bool(plan.candidate_algorithm()),
+                                                            ctypes.c_bool(plan.enable_msd_baseline_noise()))
+
+    def bind_fdas_plan(self, plan: aa_py_fdas_plan):
+        lib.aa_py_pipeline_api_bind_fdas_plan.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float,
+                                                          ctypes.c_bool]
+        lib.aa_py_pipeline_api_bind_fdas_plan.restype = ctypes.c_bool
+        return lib.aa_py_pipeline_api_bind_fdas_plan(self.m_obj, ctypes.c_float(plan.sigma_cutoff()),
+                                                     ctypes.c_float(plan.sigma_constant()),
+                                                     ctypes.c_bool(plan.enable_msd_baseline_noise()))
+
+    ## \brief Runs the pipeline step by step. Also provides a status code. #
+    def run(self):
+        lib.aa_py_pipeline_api_run.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_int)]
+        lib.aa_py_pipeline_api_run.restype = ctypes.c_bool
+        self.m_status_code_c_int = ctypes.c_int()
+        api_return_value = lib.aa_py_pipeline_api_run(self.m_obj, self.m_status_code_c_int)
+        return ctypes.c_bool(api_return_value).value
+
+    ## \brief Status code of the pipeline that is available after each callback. #
+    def status_code(self):
+        return self.m_status_code_c_int.value
+
+    def get_candidates(self):
+        lib.aa_py_spd_nCandidates.restype = ctypes.c_size_t
+        lib.aa_py_h_dm.restype = ctypes.POINTER(ctypes.c_uint)
+        lib.aa_py_h_ts.restype = ctypes.POINTER(ctypes.c_uint)
+        lib.aa_py_h_snr.restype = PFLOAT
+        lib.aa_py_h_width.restype = ctypes.POINTER(ctypes.c_uint)
+        lib.aa_py_current_range.restype = ctypes.c_int
+        lib.aa_py_current_time_chunk.restype = ctypes.c_int
+        lib.aa_py_current_inc.restype = ctypes.c_long
+        #        time_sample = []
+        if self.m_status_code_c_int.value == 1:
+            nCandidates = lib.aa_py_spd_nCandidates(self.m_obj)
+            dm = lib.aa_py_h_dm(self.m_obj)
+            time_sample = lib.aa_py_h_ts(self.m_obj)
+            snr = lib.aa_py_h_snr(self.m_obj)
+            width = lib.aa_py_h_width(self.m_obj)
+            current_range = lib.aa_py_current_range(self.m_obj)
+            current_tchunk = lib.aa_py_current_time_chunk(self.m_obj)
+            current_inc = lib.aa_py_current_inc(self.m_obj)
+            return nCandidates, dm, time_sample, snr, width, current_range, current_tchunk, current_inc
+        else:
+            return None, [], [], [], [], None, None, None
+
+    ## \brief Returns a pointer to the dedispersed output_buffer in the library. #
+    def get_buffer(self):
+        # lib.my_class_get_buffer.argtypes = [ctypes.c_void_p]
+        lib.aa_py_buffer.restype = PPPFLOAT
+        lib.aa_py_current_inc.restype = ctypes.c_long
+        ddtr_output_pointer = lib.aa_py_buffer(self.m_obj)
+        tprocessed = lib.aa_py_total_computed_samples(self.m_obj)
+        return tprocessed, ddtr_output_pointer
+
+    def dm_low(self, pos: int):
+        lib.aa_py_dm_low.argtypes = [ctypes.c_int]
+        lib.aa_py_dm_low.restype = ctypes.c_int
+        return lib.aa_py_dm_low(self.m_obj, pos)
+
+    def cleanUp(self):
+        lib.aa_py_cleanup.restype = ctypes.c_bool
+        api_return_value = lib.aa_py_cleanup(self.m_obj)
+        return ctypes.c_bool(api_return_value).value
+
+
+class header():
+    def information_file(basename, samples, dm, downsamp, metadata):
+        bandwidth = metadata.m_nchans * metadata.m_foff * (-1.0)
+        cfreq_low = metadata.m_fch1 - bandwidth - metadata.m_foff
+        header_file = basename + ".inf"
+        header = open(header_file, "w")
+        header.write(" Data file name without suffix          =  " + basename + "\n")
+        header.write(" Telescope used                         =  ???\n")
+        header.write(" Instrument used                        =  unset\n")
+        header.write(" Object being observed                  =  Mystery_PSR\n")
+        header.write(" J2000 Right Ascension (hh:mm:ss.ssss)  =  00:00:00.0000\n")  # + str(metadata.m_src_raj) + "\n")
+        header.write(" J2000 Declination     (dd:mm:ss.ssss)  =  00:00:00.0000\n")  # + str(metadata.m_src_dej) + "\n")
+        header.write(" Data observed by                       =  unset\n")
+        header.write(" Epoch of observation (MJD)             =  " + str(metadata.m_tstart) + "\n")
+        header.write(" Barycentered?           (1 yes, 0 no)  =  0\n")  # + str(metadata.m_barycentric) + "\n")
+        header.write(" Number of bins in the time series      =  " + str(samples) + "\n")
+        header.write(" Width of each time series bin (sec)    =  " + str(metadata.m_tsamp * downsamp) + "\n")
+        header.write(" Any breaks in the data? (1 yes, 0 no)  =  0\n")
+        header.write(" Type of observation (EM band)          =  Radio\n")
+        header.write(" Beam diameter (arcsec)                 =  530\n")
+        header.write(" Dispersion measure (cm-3 pc)           =  " + str(dm) + "\n")
+        header.write(" Central freq of low channel (MHz)      =  " + str(cfreq_low) + "\n")
+        header.write(" Total bandwidth (MHz)                  =  " + str(bandwidth) + "\n")
+        header.write(" Number of channels                     =  " + str(metadata.m_nchans) + "\n")
+        header.write(" Channel bandwidth (MHz)                =  " + str(metadata.m_foff * (-1.0)) + "\n")
+        header.write(" Data analyzed by                       =  ????\n")
+
+
+class SPD():
+    def write_candidates(basename, metadata, pipeline, ddtr_plan, tprocessed, nCandidates, dm, time_samples, snr, width,
+                         current_range, current_tchunk):
+        list_ndms = pipeline.ddtr_ndms()
+        dm_low = pipeline.dm_low(current_range)
+        dm_high = pipeline.dm_low(current_range) + list_ndms[current_range] * ddtr_plan.m_dm[current_range].m_step
+        header_file = basename + "-time_chunk_" + str('{:0>2d}'.format(current_tchunk)) + "-range_" + str(
+            '{:.2f}'.format(dm_low)) + "-" + str('{:.2f}'.format(dm_high)) + ".singlepulse"
+        print(bcolors.WARNING + "Writing candidates to: " + header_file + bcolors.ENDC)
+        file_cand = open(header_file, "w")
+        file_cand.write("# DM      Sigma      Time (s)     Sample    Boxcar_Width\n")
+        for i in range(0, nCandidates):
+            true_dm = dm[i] * (ddtr_plan.m_dm[current_range].m_step) + dm_low
+            true_ts = time_samples[i] * metadata.m_tsamp * ddtr_plan.m_dm[
+                current_range].m_inBin + tprocessed * metadata.m_tsamp
+            true_sample = time_samples[i] * ddtr_plan.m_dm[current_range].m_inBin + tprocessed
+            #            file_cand.write(str('{:.3f}'.format(dm[i]*ddtr_plan.m_dm[current_range].m_step)) + "\t" + str('{:.3f}'.format(snr[i])) + "\t" + str('{:.4f}'.format(time_samples[i]*metadata.m_tsamp)) + "\t" + str(width[i]) + "\n")
+            file_cand.write(str('{:.3f}'.format(true_dm)) + "\t" + str('{:.3f}'.format(snr[i])) + "\t" + str(
+                '{:.4f}'.format(true_ts)) + "\t" + str(true_sample) + "\t" + str(width[i]) + "\n")
+        file_cand.close()
+
+    def scale(metadata, pipeline, ddtr_plan, tprocessed, nCandidates, dm, time_samples, snr, width, current_range,
+              current_tchunk):
+        scale_dm = []
+        scale_time_sample = []
+        scale_time = []
+        scale_width = []
+        scale_snr = []
+        for i in range(0, nCandidates):
+            dm_low = pipeline.dm_low(current_range)
+            list_ndms = pipeline.ddtr_ndms()
+            scale_dm.append(dm[i] * (ddtr_plan.m_dm[current_range].m_step) + dm_low)
+            scale_time_sample.append(time_samples[i] * ddtr_plan.m_dm[current_range].m_inBin + tprocessed)
+            scale_time.append(time_samples[i] * metadata.m_tsamp * ddtr_plan.m_dm[
+                current_range].m_inBin + tprocessed * metadata.m_tsamp)
+            scale_width.append(width[i] * ddtr_plan.m_dm[current_range].m_inBin)
+            scale_snr.append(snr[i])
+        return scale_dm, scale_snr, scale_time_sample, scale_time, scale_width
+
+    def write_maximum(dm, snr, time, ts, width):
+        index = np.argmax(snr)
+        print("#DM \t SNR \t TIME \t SAMPLE \t WIDTH")
+        print('{:.2f}'.format(dm[index]), "\t", '{:.2f}'.format(snr[index]), "\t", '{:.2f}'.format(time[index]), "\t",
+              ts[index], "\t", width[index])
