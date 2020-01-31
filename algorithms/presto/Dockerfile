@@ -94,3 +94,7 @@ RUN python setup.py install
 
 USER frbbench
 WORKDIR /home/frbbench
+
+COPY dedisp_FRB_challenge.py /home/frbbench
+
+ENTRYPOINT ["python", "dedisp_FRB_challenge.py"]
