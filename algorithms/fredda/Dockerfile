@@ -20,36 +20,13 @@ RUN apt-get -y check && \
     apt-get -y install apt-utils software-properties-common && \
     apt-get -y update --fix-missing && \
     apt-get -y upgrade && \
-    apt-get -y install build-essential && \
-    apt-get install -y git &&\
-    apt-get install -y cmake &&\
-    apt-get install -y python-dev &&\
-    apt-get install -y python3-dev &&\
-    apt-get install -y python-pip &&\
-    apt-get install -y unzip &&\
-    apt-get install -y wget &&\
-    apt-get install -y automake &&\
-    apt-get install -y autoconf &&\
-    apt-get install -y autotools-dev &&\
-    apt-get install -y csh &&\
-    apt-get install -y libtool &&\
-    apt-get install -y m4 &&\
-    apt-get install -y apt-utils &&\
+    apt-get -y install build-essential git cmake python-dev python3-dev python-pip unzip wget automake autoconf autotools-dev csh libtool m4 apt-utils &&\
     apt-get clean
 
 # Install python packages
 RUN pip install --upgrade pip -U && \
     hash pip && \
-    pip install setuptools -U && \
-    pip install wheel -U && \
-    pip install numpy -U && \
-    pip install scipy -U && \
-    pip install ephem -U && \
-    pip install matplotlib -U && \
-    pip install katcp -U && \
-    pip install tornado -U && \
-    pip install astropy -U && \		
-    pip install cmd2 -U	
+    pip install -U setuptools wheel numpy scipy ephem matplotlib katcp tornado astropy cmd2 -U
 
 # Define directory for source code, OSTYPE and installation directory
 ENV SOURCE           /root
@@ -115,6 +92,11 @@ ENV CUDA=/usr/local/cuda
 ENV FREDDA=$SOURCE/craft/cuda-fdmt/cudafdmt/src/
 WORKDIR $FREDDA
 ENV PATH=$FREDDA:$PATH
-RUN cp fredda.mk.template fredda.mk
-RUN make
+RUN cp fredda.mk.template fredda.mk &&\
+    make; \
+    cp Makefile Makefile.old && \
+    sed -i s/-std=c\+\+11//g Makefile &&\
+    make; \
+    cp Makefile.old Makefile &&\
+    make
 #-j 24
