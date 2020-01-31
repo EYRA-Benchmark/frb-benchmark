@@ -5,7 +5,7 @@
 # as you do not remove the above attribution and reasonably
 # inform receipients that you have modified the original work.
 
-FROM nvidia/cuda:9.1-devel-ubuntu16.04
+FROM nvidia/cuda:10.1-devel-ubuntu16.04
 #FROM nvidia/cuda:9.2-devel-ubuntu18.04
 MAINTAINER Xinping Deng "xinping.deng@gmail.com"
 
@@ -92,11 +92,15 @@ ENV CUDA=/usr/local/cuda
 ENV FREDDA=$SOURCE/craft/cuda-fdmt/cudafdmt/src/
 WORKDIR $FREDDA
 ENV PATH=$FREDDA:$PATH
+#RUN cp fredda.mk.template fredda.mk &&\
+#    sed -i s/60/70/g fredda.mk &&\
+#    make; \
+#    cp Makefile Makefile.old && \
+#    sed -i s/-std=c\+\+11//g Makefile &&\
+#    make; \
+#    cp Makefile.old Makefile &&\
+#    make
 RUN cp fredda.mk.template fredda.mk &&\
-    make; \
-    cp Makefile Makefile.old && \
-    sed -i s/-std=c\+\+11//g Makefile &&\
-    make; \
-    cp Makefile.old Makefile &&\
+    sed -i s/60/70/g fredda.mk &&\
     make
 #-j 24
