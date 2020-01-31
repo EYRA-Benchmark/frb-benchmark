@@ -85,7 +85,8 @@ WORKDIR /opt/frbbench
 RUN git clone https://github.com/scottransom/presto.git
 
 WORKDIR $PRESTO/src
-RUN make prep && \
+RUN sed -i s/4000\.0/10000\.0/g /opt/frbbench/presto/src/prepsubband_cmd.c &&\
+    make prep && \
     make
 
 WORKDIR $PRESTO
