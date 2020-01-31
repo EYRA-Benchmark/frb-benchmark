@@ -2,7 +2,6 @@ from __future__ import print_function
 from builtins import zip
 from builtins import range
 import os
-import sys 
 
 system = "ASKAP" # Needs to be one of the following
 
@@ -55,15 +54,16 @@ dmspercalls = [[88, 76, 76],
 nsub = 112 if system=="ASKAP" else 128 
 
 # The basename of the output files you want to use
-basename = sys.argv[1]
-
+basename = "/tmp/intermediate"
 # The name of the raw data file (or files if you use wildcards) to use
-rawfiles = basename+"*.fil"
-
+rawfiles = "/data/input/test_data"
+os.system("ln -s %s %s.fil" % (rawfiles, rawfiles))
+rawfiles = rawfiles+'.fil'
 # Loop over the DDplan plans
 for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in \
         zip(dDMs[index], dsubDMs[index], dmspercalls[index], downsamps[index], subcalls[index], startDMs[index]):
     # Get our downsampling right
+    print(downsamp, downsamps)
     subdownsamp = downsamp/2
     datdownsamp = 2
     if downsamp < 2: subdownsamp = datdownsamp = 1
