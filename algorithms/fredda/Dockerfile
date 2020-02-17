@@ -104,3 +104,10 @@ RUN cp fredda.mk.template fredda.mk &&\
     sed -i s/60/70/g fredda.mk &&\
     make
 #-j 24
+
+COPY run.sh /
+COPY get_fil_header.py /
+
+RUN chmod a+x /run.sh
+
+CMD ["/run.sh"]
