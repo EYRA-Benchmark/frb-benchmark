@@ -1,0 +1,61 @@
+provider "aws" {
+  region = "eu-central-1"
+}
+
+resource "aws_key_pair" "deployer" {
+  key_name   = "sshkey"
+  public_key = "${file("id_rsa.pub")}"
+}
+
+resource "aws_security_group" "sec" {
+  name = "sec"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "web" {
+  instance_type = "g2.2xlarge"
+  #  spot_price    = "0.24"
+  # availability_zone        = "eu-central-1a"
+  vpc_security_group_ids = ["${aws_security_group.sec.id}"]
+  ami = data.aws_ami.ubuntu.id # ubuntu 18
+  key_name = "sshkey"
+  root_block_device {
+    volume_size = "150" #GB
+    delete_on_termination = false
+  }
+
+}
+data "aws_ami" "ubuntu" {
+    most_recent = true
+
+    filter {
+        name   = "name"
+        values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+    }
+
+    filter {
+        name   = "virtualization-type"
+        values = ["hvm"]
+    }
+
+    owners = ["099720109477"] # Canonical
+}
+resource "aws_eip" "staging_eip" {
+  instance = aws_instance.web.id
+  vpc      = true
+}
+
+output "image_id" {
+    value = data.aws_ami.ubuntu.id
+}
