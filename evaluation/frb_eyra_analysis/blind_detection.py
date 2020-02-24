@@ -421,8 +421,8 @@ def compare(input_df, truth_df):
             input_df.loc[guess_index, Column.truth_index] = i
 
 
-INPUT_PATH = './data/input/implementation_output'
-GROUND_TRUTH_PATH = './data/input/ground_truth'
+INPUT_PATH = '/data/input/implementation_output'
+GROUND_TRUTH_PATH = '/data/input/ground_truth'
 
 if __name__ == "__main__":
     truth_df = pandas.read_csv(GROUND_TRUTH_PATH, names=truth_columns, delim_whitespace=True, skiprows=1)
