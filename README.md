@@ -3,7 +3,7 @@ This repository contains Dockerfiles for running algorithms for the [Fast Radio 
 
 ## Interface
 The algorithms are provided as Docker image and implement a specific interface.
-Each Docker image will read data from the file `/data/input/test_data` (a filterbank file, containing injected FRBs - for details and examples, see [the benchmark details](https://www.eyrabenchmark.net/benchmark/4fcec5b8-40ad-4ca7-a663-c4f96c52bd19)), and should write detected FRB candidates to a the file `/data/output`. One line per candidate, with the following fields (separated with a space character): `<DM> <S/N> <TIME> <LOG_2_DOWNSAMPLE> <FREQ_REF>`.
+Each Docker image will read data from the file `/data/input/test_data` (a filterbank file, containing injected FRBs - for details and examples, see [the benchmark details](https://www.eyrabenchmark.net/benchmark/4fcec5b8-40ad-4ca7-a663-c4f96c52bd19)), and should write detected FRB candidates to a the file `/data/output`. One line per candidate, with the following fields (separated with a space character): `<DM> <S/N> <TIME> <DOWNSAMPLE> <FREQ_REF>`.
 These output files are then evaluated by the `evaluation` algorithm, which expects the algorithms output at `/data/input/implementation_output`, and the actual injected FRBs at `/data/input/ground_truth`. It will then output a JSON file containing totals (detected/missed/false positives) to `/data/output`.
 
 ## Running manually
