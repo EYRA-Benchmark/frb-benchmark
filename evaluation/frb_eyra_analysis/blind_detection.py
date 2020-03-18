@@ -15,7 +15,7 @@ import pandas
 from scipy import interpolate
 import matplotlib as mpl
 
-mpl.use("Agg", warn=False)
+#mpl.use("Agg", warn=False)
 #from frb_eyra_analysis import simulate_frb
 #from frb_eyra_analysis import tools
 
