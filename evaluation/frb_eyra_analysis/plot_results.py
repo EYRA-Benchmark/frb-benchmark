@@ -1,5 +1,6 @@
 import sys
 
+import argparse
 import numpy as np
 import matplotlib.pylab as plt
 import pandas as pd 
@@ -24,7 +25,7 @@ def manage_input(fn):
     
     return df_gt_plot, df_op_plot, data
 
-def plot_arb(fn, param1, param2, sizeparam='snr'):
+def plot_arb_json(fn, param1, param2, sizeparam='snr'):
     """ Plot two parameters against one another for both 
     the ground_truth and the code output data
     """
@@ -55,18 +56,46 @@ def plot_arb(fn, param1, param2, sizeparam='snr'):
     plt.ylabel(param2, fontsize=18)
     plt.show()
 
+def plot_arb_txt(files):
+    fig = plt.figure()
+
+    for fn in files:
+        df = pandas.read_csv(fn, names=truth_columns, delim_whitespace=True, skiprows=1)
+        print(df)
+
 if __name__=='__main__':
-    assert len(sys.argv)>2, "Expecting param1 param2 [filename]\nIf no file name is given, assuming data/output"
+    parser = argparse.ArgumentParser(description="Generates plots to visualise output data",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-f', '--file', help='json file(s)', type=str, nargs='+', required=True)
+    parser.add_argument('-json', '--json', help='json files as opposed to standard output', action='store_true')
+    parser.add_argument('-param1', '--param1', help='y-axis parameter (snr, toa, dm, width)', default='dm')
+    parser.add_argument('-param2', '--param2', help='x-axis parameter (snr, toa, dm, width)', default='toa')
+        pass)
+    inputs = parser.parse_args()
 
-    param1 = sys.argv[1]
-    param2 = sys.argv[2]
+    #assert len(sys.argv)>2, "Expecting param1 param2 [filename]\nIf no file name is given, assuming data/output"
 
-    try:
-        fn = sys.argv[3]
-    except:
-        fn = 'data/output'
-        
-    plot_arb(fn, param1, param2, sizeparam='snr')
+    if inputs.json:
+        plot_arb_json(fn, param1, param2, sizeparam='snr')
+    else:
+        plot_arb_txt(inputs.file, inputs.param1, inputs.param2, sizeparam='snr')        
+    
 
+# if __name__ == '__main__':
+#     parser = argparse.ArgumentParser(description="Generates plots to visualise search software performance",
+#                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+#     parser.add_argument('-f', '--file', help='json file', type=str, required=True)
+#     parser.add_argument('-ss', '--snr_snr_plot', help='Save snr snr plot', action='store_true')
+#     parser.add_argument('-r', '--recall_plot', help='Save 1D recall plot', action='store_true')
+#     inputs = parser.parse_args()
+    
+#     title = os.path.splitext(inputs.file)[0].split('_')[-1]
+#     df_gt_plot, df_op_plot, gt_indices, op_indices = manage_input(inputs.file)
+    
+#     if inputs.snr_snr_plot:
+#         snr_snr_plot(df_gt_plot, df_op_plot, gt_indices, op_indices, ['dm', 'width', 'toa'], title = None, save=True)    
+    
+#     if inputs.recall_plot:
+#         recall_1d(df_gt_plot, gt_indices, 'dm', recall_bins = 10, hist_bins = 30, title=title, save=True)
 
 
