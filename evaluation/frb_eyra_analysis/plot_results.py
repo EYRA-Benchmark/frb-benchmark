@@ -77,6 +77,7 @@ if __name__=='__main__':
     if inputs.json:
         plot_arb_json(fn, param1, param2, sizeparam='snr')
     else:
+        print(inputs.file)
         plot_arb_txt(inputs.file, inputs.param1, inputs.param2, sizeparam='snr')        
     
 
