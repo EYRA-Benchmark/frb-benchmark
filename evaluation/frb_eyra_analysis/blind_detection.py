@@ -424,6 +424,9 @@ def compare(input_df, truth_df):
 INPUT_PATH = '/data/input/implementation_output'
 GROUND_TRUTH_PATH = '/data/input/ground_truth'
 
+INPUT_PATH = '/tank/users/connor/eyra/data/input/implementation_output'
+GROUND_TRUTH_PATH = '/tank/users/connor/eyra/data/input/ground_truth'
+
 if __name__ == "__main__":
     truth_df = pandas.read_csv(GROUND_TRUTH_PATH, names=truth_columns, delim_whitespace=True, skiprows=1)
     input_df = pandas.read_csv(INPUT_PATH, names=input_columns, delim_whitespace=True)
