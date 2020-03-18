@@ -24,9 +24,8 @@ from blind_detection import input_columns, truth_columns, Column
 def manage_input(files):
     """ Read in output json file
     """
-    for fn in files:
-        with open(fn, 'r') as f:
-            data =  json.load(f)
+    with open(fn, 'r') as f:
+        data =  json.load(f)
     
     df_gt = pd.DataFrame(data['ground_truth']['data'], columns=data['ground_truth']['column_names'])
     df_op = pd.DataFrame(data['implementation_output']['data'], columns=data['implementation_output']['column_names'])
@@ -106,7 +105,6 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
         freq_ref_cand = input_df[Column.freq_ref][0]
         input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
 
-        print(x,y)
         plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.5)
         legend_str.append(fn.split('/')[-1])
 
@@ -136,26 +134,8 @@ if __name__=='__main__':
         logging.info('Not displaying plots.')
 
     if inputs.json:
-        plot_arb_json(inputs.file, inputs.param1, inputs.param2, sizeparam='snr')
+        for fn in inputs.file:
+            plot_arb_json(inputs.file, inputs.param1, inputs.param2, sizeparam='snr')
     else:
         plot_arb_txt(inputs.file, inputs.truth_file, inputs.param1, inputs.param2)        
     
-
-# if __name__ == '__main__':
-#     parser = argparse.ArgumentParser(description="Generates plots to visualise search software performance",
-#                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-#     parser.add_argument('-f', '--file', help='json file', type=str, required=True)
-#     parser.add_argument('-ss', '--snr_snr_plot', help='Save snr snr plot', action='store_true')
-#     parser.add_argument('-r', '--recall_plot', help='Save 1D recall plot', action='store_true')
-#     inputs = parser.parse_args()
-    
-#     title = os.path.splitext(inputs.file)[0].split('_')[-1]
-#     df_gt_plot, df_op_plot, gt_indices, op_indices = manage_input(inputs.file)
-    
-#     if inputs.snr_snr_plot:
-#         snr_snr_plot(df_gt_plot, df_op_plot, gt_indices, op_indices, ['dm', 'width', 'toa'], title = None, save=True)    
-    
-#     if inputs.recall_plot:
-#         recall_1d(df_gt_plot, gt_indices, 'dm', recall_bins = 10, hist_bins = 30, title=title, save=True)
-
-
