@@ -123,8 +123,8 @@ if __name__=='__main__':
     parser.add_argument('-f', '--file', help='json or txt file(s)', type=str, nargs='+', required=True)
     parser.add_argument('-truth_file', '--truth_file', help='must be a .txt file', type=str, required=False)
     parser.add_argument('-json', '--json', help='json files as opposed to standard output', action='store_true')
-    parser.add_argument('-param1', '--param1', help='y-axis parameter (snr, toa, dm, width)', default='dm')
-    parser.add_argument('-param2', '--param2', help='x-axis parameter (snr, toa, dm, width)', default='toa')
+    parser.add_argument('-param1', '--param1', help='y-axis parameter (snr, toa, dm, width)', default='toa')
+    parser.add_argument('-param2', '--param2', help='x-axis parameter (snr, toa, dm, width)', default='dm')
     parser.add_argument('-d', '--display_plots', help='Display plots', action='store_true')
 
     inputs = parser.parse_args()
