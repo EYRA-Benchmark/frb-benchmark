@@ -22,7 +22,7 @@ matplotlib.rcParams.update(params)
 
 from blind_detection import input_columns, truth_columns, Column
 
-def manage_input(files):
+def manage_input(fn):
     """ Read in output json file
     """
     with open(fn, 'r') as f:
