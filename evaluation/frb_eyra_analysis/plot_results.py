@@ -61,14 +61,18 @@ def plot_arb_json(fn, param1, param2, sizeparam='snr'):
 def plot_arb_txt(files, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
+    df_truth = pd.read_csv(fn, names=truth_columns, delim_whitespace=True, skiprows=1)
+    plt.plot(df_truth[Column.time], df_truth[Column.DM],'.',alpha=0.5)
+
     for fn in files:
-        df = pd.read_csv(fn, names=truth_columns, delim_whitespace=True, skiprows=1)
-        print(df)
+        df = pd.read_csv(fn, names=input_columns, delim_whitespace=True, skiprows=1)
+        plt.plot(df[Column.time], df[Column.DM],'.',alpha=0.5)
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description="Generates plots to visualise output data",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-f', '--file', help='json file(s)', type=str, nargs='+', required=True)
+    parser.add_argument('-f', '--file', help='json or txt file(s)', type=str, nargs='+', required=True)
+    parser.add_argument('-truth_file', '--truth_file', help='must be a .txt file', type=str, required=False)
     parser.add_argument('-json', '--json', help='json files as opposed to standard output', action='store_true')
     parser.add_argument('-param1', '--param1', help='y-axis parameter (snr, toa, dm, width)', default='dm')
     parser.add_argument('-param2', '--param2', help='x-axis parameter (snr, toa, dm, width)', default='toa')
@@ -79,8 +83,7 @@ if __name__=='__main__':
     if inputs.json:
         plot_arb_json(fn, param1, param2, sizeparam='snr')
     else:
-        print(inputs.file)
-        plot_arb_txt(inputs.file, inputs.param1, inputs.param2, sizeparam='snr')        
+        plot_arb_txt(inputs.file, inputs.truth_file, inputs.param1, inputs.param2, sizeparam='snr')        
     
 
 # if __name__ == '__main__':
