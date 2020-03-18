@@ -75,13 +75,17 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
     df_truth = pd.read_csv(fntruth, names=truth_columns, delim_whitespace=True, skiprows=1)
-    plt.scatter(df_truth[Column.time], df_truth[Column.DM], df_truth[Column.SN],alpha=0.5, color='k')
+    plt.scatter(df_truth[Column.time], df_truth[Column.DM], df_truth[Column.SN], alpha=1, color='k')
+    freq_ref_truth = truth_df[Column.freq_ref][0]
 
     legend_str = ['Truth']
 
     for fn in files:
-        df = pd.read_csv(fn, names=input_columns, delim_whitespace=True, skiprows=1)
-        plt.scatter(df[Column.time], df[Column.DM], df[Column.SN], alpha=0.5)
+        input_df = pd.read_csv(fn, names=input_columns, delim_whitespace=True, skiprows=1)
+        freq_ref_cand = input_df[Column.freq_ref][0]
+        input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
+
+        plt.scatter(input_df[Column.time], input_df[Column.DM], input_df[Column.SN], alpha=0.5)
         legend_str.append(fn.split('/')[-1])
 
     plt.legend(legend_str)
