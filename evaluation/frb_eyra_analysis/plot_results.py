@@ -70,7 +70,6 @@ if __name__=='__main__':
     parser.add_argument('-json', '--json', help='json files as opposed to standard output', action='store_true')
     parser.add_argument('-param1', '--param1', help='y-axis parameter (snr, toa, dm, width)', default='dm')
     parser.add_argument('-param2', '--param2', help='x-axis parameter (snr, toa, dm, width)', default='toa')
-        pass)
     inputs = parser.parse_args()
 
     #assert len(sys.argv)>2, "Expecting param1 param2 [filename]\nIf no file name is given, assuming data/output"
