@@ -49,7 +49,11 @@ def plot_arb_json(fn, param1, param2, sizeparam='snr'):
     df_gt_plot, df_op_plot, data = manage_input(fn)
 
     matches = data['matches']
-    ind_matches = matches.values()
+    ind_matches_ = matches.keys()
+
+    ind_matches = []
+    for ii in ind_matches_:
+        ind_matches.append(int(ii))
     
     assert param1 in ['dm', 'snr', 'toa'], "Don't recognize the first parameter"
     assert param2 in ['dm', 'snr', 'toa'], "Don't recognize the second paramater"
@@ -57,7 +61,6 @@ def plot_arb_json(fn, param1, param2, sizeparam='snr'):
     data_gt_x = df_gt_plot['in_'+param1]
     data_gt_y = df_gt_plot['in_'+param2]
 
-    print(df_op_plot)
     data_op_x = df_op_plot['out_'+param1]
     data_op_y = df_op_plot['out_'+param2]
 
