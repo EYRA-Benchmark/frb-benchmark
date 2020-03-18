@@ -27,13 +27,13 @@ def manage_input(fn):
     
     return df_gt_plot, df_op_plot, data
 
-def plot_arb_json(fn, param1, param2, sizeparam='snr'):
+def plot_arb_json(fn, fntruth, param1, param2, sizeparam='snr'):
     """ Plot two parameters against one another for both 
     the ground_truth and the code output data
     """
     fig = plt.figure()
 
-    df_gt_plot, df_op_plot, data = manage_input(fn)
+    df_gt_plot, df_op_plot, data = manage_input(fntruth)
 
     matches = data['matches']
     ind_matches = matches.values()
