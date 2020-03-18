@@ -135,7 +135,7 @@ if __name__=='__main__':
         logging.info('Not displaying plots.')
 
     if inputs.json:
-        plot_arb_json(inputs.file, param1, param2, sizeparam='snr')
+        plot_arb_json(inputs.file, inputs.param1, inputs.param2, sizeparam='snr')
     else:
         plot_arb_txt(inputs.file, inputs.truth_file, inputs.param1, inputs.param2)        
     
