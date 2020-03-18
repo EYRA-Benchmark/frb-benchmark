@@ -81,7 +81,7 @@ def plot_arb_json(fn, param1, param2, sizeparam='snr'):
 def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
-    truth_df = pd.read_csv(fntruth, names=truth_columns, delim_whitespace=True, skiprows=1)
+    truth_df = pd.read_csv(fntruth, names=truth_columns, comment='#', delim_whitespace=True, skiprows=1)
     freq_ref_truth = truth_df[Column.freq_ref][0]
 
     legend_str = []
@@ -108,7 +108,7 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
         msize = Column.width
 
     for fn in files:
-        input_df = pd.read_csv(fn, names=input_columns, delim_whitespace=True, skiprows=1)
+        input_df = pd.read_csv(fn, names=input_columns, comment='#', delim_whitespace=True, skiprows=1)
         freq_ref_cand = input_df[Column.freq_ref][0]
         input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
 
