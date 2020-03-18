@@ -57,6 +57,7 @@ def plot_arb_json(fn, param1, param2, sizeparam='snr'):
     data_gt_x = df_gt_plot['in_'+param1]
     data_gt_y = df_gt_plot['in_'+param2]
 
+    print(df_op_plot)
     data_op_x = df_op_plot['out_'+param1]
     data_op_y = df_op_plot['out_'+param2]
 
@@ -67,8 +68,8 @@ def plot_arb_json(fn, param1, param2, sizeparam='snr'):
     plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], size_op, color='C0', alpha=1)
 #    plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], size_op, color='C1', alpha=0.5)
     plt.legend(['Ground truth', 'Code output'])
-    plt.xlabel(param1, fontsize=18)
-    plt.ylabel(param2, fontsize=18)
+    plt.xlabel(param1, fontsize=16)
+    plt.ylabel(param2, fontsize=16)
     plt.show()
 
 def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
