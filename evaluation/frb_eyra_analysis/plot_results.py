@@ -75,7 +75,7 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
     df_truth = pd.read_csv(fntruth, names=truth_columns, delim_whitespace=True, skiprows=1)
-    plt.plot(df_truth[Column.time], df_truth[Column.DM],'.',alpha=0.5)
+    plt.scatter(df_truth[Column.time], df_truth[Column.DM],df_truth[Column.'SN'],alpha=0.5, color='k')
 
     for fn in files:
         df = pd.read_csv(fn, names=input_columns, delim_whitespace=True, skiprows=1)
