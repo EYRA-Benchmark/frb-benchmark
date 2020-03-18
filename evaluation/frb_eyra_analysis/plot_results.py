@@ -60,7 +60,7 @@ def plot_arb_txt(files, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
     for fn in files:
-        df = pandas.read_csv(fn, names=truth_columns, delim_whitespace=True, skiprows=1)
+        df = pd.read_csv(fn, names=truth_columns, delim_whitespace=True, skiprows=1)
         print(df)
 
 if __name__=='__main__':
