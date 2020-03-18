@@ -46,30 +46,33 @@ def plot_arb_json(fn, param1, param2, sizeparam='snr'):
     """
     fig = plt.figure()
 
-    df_gt_plot, df_op_plot, data = manage_input(fn)
+    for ii, fn in enumerate(fn):
+        df_gt_plot, df_op_plot, data = manage_input(fn)
 
-    matches = data['matches']
-    ind_matches_ = matches.keys()
+        matches = data['matches']
+        ind_matches_ = matches.keys()
 
-    ind_matches = []
-    for ii in ind_matches_:
-        ind_matches.append(int(ii))
-    
-    assert param1 in ['dm', 'snr', 'toa'], "Don't recognize the first parameter"
-    assert param2 in ['dm', 'snr', 'toa'], "Don't recognize the second paramater"
+        ind_matches = []
+        for ind in ind_matches_:
+            ind_matches.append(int(ind))
+        
+        assert param1 in ['dm', 'snr', 'toa'], "Don't recognize the first parameter"
+        assert param2 in ['dm', 'snr', 'toa'], "Don't recognize the second paramater"
 
-    data_gt_x = df_gt_plot['in_'+param1]
-    data_gt_y = df_gt_plot['in_'+param2]
+        data_gt_x = df_gt_plot['in_'+param1]
+        data_gt_y = df_gt_plot['in_'+param2]
 
-    data_op_x = df_op_plot['out_'+param1]
-    data_op_y = df_op_plot['out_'+param2]
+        data_op_x = df_op_plot['out_'+param1]
+        data_op_y = df_op_plot['out_'+param2]
 
-    size_gt = df_gt_plot['in_'+sizeparam]
-    size_op = df_op_plot['out_'+sizeparam]
+        size_gt = df_gt_plot['in_'+sizeparam]
+        size_op = df_op_plot['out_'+sizeparam]
 
-    plt.scatter(data_gt_x, data_gt_y, size_gt, color='k', alpha=0.65)
-    plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], size_op, color='C1', alpha=0.65)
-#    plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], size_op, color='C1', alpha=0.5)
+        if ii==0:
+            plt.scatter(data_gt_x, data_gt_y, size_gt, color='k', alpha=0.65)
+
+        plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], size_op, color='C1', alpha=0.65)
+
     plt.legend(['Ground truth', 'Code output'])
     plt.xlabel(param1, fontsize=16)
     plt.ylabel(param2, fontsize=16)
