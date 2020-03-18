@@ -75,18 +75,41 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
     truth_df = pd.read_csv(fntruth, names=truth_columns, delim_whitespace=True, skiprows=1)
-    plt.scatter(truth_df[Column.time], truth_df[Column.DM], truth_df[Column.SN], alpha=1, color='k')
     freq_ref_truth = truth_df[Column.freq_ref][0]
 
-    legend_str = ['Truth']
+    legend_str = []
+
+    if param1 in ('time', 'toa', 'Time'):
+        x = Column.time
+    elif param1 in ('dm', 'DM'):
+        x = Column.DM
+    elif param1 in ('Width', 'width'):
+        x = Column.width
+
+    if param2 in ('time', 'toa', 'Time'):
+        y = Column.time
+    elif param2 in ('dm', 'DM'):
+        y = Column.DM
+    elif param2 in ('Width', 'width'):
+        y = Column.width
+
+    if sizeparam in ('snr', 'sig', 'SNR', 'SN'):
+        msize = Column.SN
+    elif sizeparam in ('dm', 'DM'):
+        msize = Column.DM
+    elif sizeparam in ('Width', 'width'):
+        msize = Column.width
 
     for fn in files:
         input_df = pd.read_csv(fn, names=input_columns, delim_whitespace=True, skiprows=1)
         freq_ref_cand = input_df[Column.freq_ref][0]
         input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
 
-        plt.scatter(input_df[Column.time], input_df[Column.DM], input_df[Column.SN], alpha=0.5)
+        plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.5)
         legend_str.append(fn.split('/')[-1])
+
+    plt.scatter(truth_df[Column.time], truth_df[Column.DM], truth_df[Column.SN], alpha=1, color='k')
+    legend_str.append('Truth')
 
     plt.legend(legend_str)
     plt.ylabel('DM (pc cm**-3)', fontsize=16)
