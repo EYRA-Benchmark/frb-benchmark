@@ -75,13 +75,13 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
     df_truth = pd.read_csv(fntruth, names=truth_columns, delim_whitespace=True, skiprows=1)
-    plt.scatter(df_truth[Column.time], df_truth[Column.DM],df_truth[Column.SN],alpha=0.5, color='k')
+    plt.scatter(df_truth[Column.time], df_truth[Column.DM], df_truth[Column.SN],alpha=0.5, color='k')
 
     legend_str = ['Truth']
 
     for fn in files:
         df = pd.read_csv(fn, names=input_columns, delim_whitespace=True, skiprows=1)
-        plt.scatter(df[Column.time], df[Column.DM], df[Column.SN]'.',alpha=0.5)
+        plt.scatter(df[Column.time], df[Column.DM], df[Column.SN], alpha=0.5)
         legend_str.append(fn.split('/')[-1])
 
     plt.legend(legend_str)
