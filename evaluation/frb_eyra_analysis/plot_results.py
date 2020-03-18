@@ -21,11 +21,12 @@ matplotlib.rcParams.update(params)
 
 from blind_detection import input_columns, truth_columns, Column
 
-def manage_input(fn):
+def manage_input(files):
     """ Read in output json file
     """
-    with open(fn, 'r') as f:
-        data = json.load(f)
+    for fn in files:
+        with open(fn, 'r') as f:
+            data =  json.load(f)
     
     df_gt = pd.DataFrame(data['ground_truth']['data'], columns=data['ground_truth']['column_names'])
     df_op = pd.DataFrame(data['implementation_output']['data'], columns=data['implementation_output']['column_names'])
