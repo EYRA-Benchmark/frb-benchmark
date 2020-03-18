@@ -6,6 +6,8 @@ import matplotlib.pylab as plt
 import pandas as pd 
 import json
 
+from blind_detection import input_columns, truth_columns
+
 def manage_input(fn):
     """ Read in output json file
     """
