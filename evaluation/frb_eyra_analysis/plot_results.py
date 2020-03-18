@@ -2,9 +2,20 @@ import sys
 
 import argparse
 import numpy as np
-import matplotlib.pylab as plt
 import pandas as pd 
 import json
+import matplotlib
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+params = {
+        'axes.labelsize' : 16,
+        'font.size' : 14,
+        'legend.fontsize': 14,
+        'xtick.labelsize': 16,
+        'ytick.labelsize': 16,
+        'text.usetex': False,
+        'figure.figsize': [10, 8]
+        }
+matplotlib.rcParams.update(params)
 
 from blind_detection import input_columns, truth_columns, Column
 
@@ -78,9 +89,14 @@ if __name__=='__main__':
     parser.add_argument('-json', '--json', help='json files as opposed to standard output', action='store_true')
     parser.add_argument('-param1', '--param1', help='y-axis parameter (snr, toa, dm, width)', default='dm')
     parser.add_argument('-param2', '--param2', help='x-axis parameter (snr, toa, dm, width)', default='toa')
+    parser.add_argument('-d', '--display_plots', help='Display plots', action='store_true')
+
     inputs = parser.parse_args()
 
     #assert len(sys.argv)>2, "Expecting param1 param2 [filename]\nIf no file name is given, assuming data/output"
+
+    if not inputs.display_plots:
+        logging.info('Not displaying plots.')
 
     if inputs.json:
         plot_arb_json(fn, param1, param2, sizeparam='snr')
