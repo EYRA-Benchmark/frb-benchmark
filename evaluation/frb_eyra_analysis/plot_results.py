@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 import pandas as pd 
 import json
+import logging
 import matplotlib
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 params = {
