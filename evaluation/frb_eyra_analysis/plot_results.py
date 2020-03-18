@@ -46,7 +46,7 @@ def plot_arb_json(files, param1, param2, sizeparam='snr'):
     the ground_truth and the code output data
     """
     fig = plt.figure()
-
+    legend_str = []
     for ii, fn in enumerate(files):
         df_gt_plot, df_op_plot, data = manage_input(fn)
 
