@@ -105,10 +105,11 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
         freq_ref_cand = input_df[Column.freq_ref][0]
         input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
 
+        print(x,y)
         plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.5)
         legend_str.append(fn.split('/')[-1])
 
-    plt.scatter(truth_df[Column.time], truth_df[Column.DM], truth_df[Column.SN], alpha=1, color='k')
+    plt.scatter(truth_df[x], truth_df[y], truth_df[msize], alpha=1, color='k')
     legend_str.append('Truth')
 
     plt.legend(legend_str)
