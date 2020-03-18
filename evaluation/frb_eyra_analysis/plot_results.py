@@ -74,7 +74,7 @@ def plot_arb_json(files, param1, param2, sizeparam='snr'):
 
         legend_str.append(fn.split('/')[-1])
         plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], 
-                    size_op, alpha=0.65, marker=marker[ii])
+                    size_op, alpha=0.65, marker=markers[ii])
 
     legend_str.append('Truth')
     plt.scatter(data_gt_x, data_gt_y, size_gt, color='k', alpha=0.65, marker='d')
@@ -119,7 +119,7 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
         freq_ref_cand = input_df[Column.freq_ref][0]
         input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
 
-        plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.5, marker=marker[ii])
+        plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.5, marker=markers[ii])
         legend_str.append(fn.split('/')[-1])
 
     plt.scatter(truth_df[x], truth_df[y], truth_df[msize], alpha=0.55, color='k', marker='d')
