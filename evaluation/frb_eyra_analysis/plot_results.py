@@ -56,7 +56,7 @@ def plot_arb_json(fn, param1, param2, sizeparam='snr'):
     plt.ylabel(param2, fontsize=18)
     plt.show()
 
-def plot_arb_txt(files, param1, param2):
+def plot_arb_txt(files, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
     for fn in files:
