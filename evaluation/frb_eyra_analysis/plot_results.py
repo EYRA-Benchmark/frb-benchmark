@@ -27,13 +27,13 @@ def manage_input(fn):
     
     return df_gt_plot, df_op_plot, data
 
-def plot_arb_json(fn, fntruth, param1, param2, sizeparam='snr'):
+def plot_arb_json(fn, param1, param2, sizeparam='snr'):
     """ Plot two parameters against one another for both 
     the ground_truth and the code output data
     """
     fig = plt.figure()
 
-    df_gt_plot, df_op_plot, data = manage_input(fntruth)
+    df_gt_plot, df_op_plot, data = manage_input(fn)
 
     matches = data['matches']
     ind_matches = matches.values()
@@ -58,15 +58,17 @@ def plot_arb_json(fn, fntruth, param1, param2, sizeparam='snr'):
     plt.ylabel(param2, fontsize=18)
     plt.show()
 
-def plot_arb_txt(files, param1, param2, sizeparam='snr'):
+def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
-    df_truth = pd.read_csv(fn, names=truth_columns, delim_whitespace=True, skiprows=1)
+    df_truth = pd.read_csv(fntruth, names=truth_columns, delim_whitespace=True, skiprows=1)
     plt.plot(df_truth[Column.time], df_truth[Column.DM],'.',alpha=0.5)
 
     for fn in files:
         df = pd.read_csv(fn, names=input_columns, delim_whitespace=True, skiprows=1)
         plt.plot(df[Column.time], df[Column.DM],'.',alpha=0.5)
+
+    plt.show()
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description="Generates plots to visualise output data",
@@ -83,7 +85,7 @@ if __name__=='__main__':
     if inputs.json:
         plot_arb_json(fn, param1, param2, sizeparam='snr')
     else:
-        plot_arb_txt(inputs.file, inputs.truth_file, inputs.param1, inputs.param2, sizeparam='snr')        
+        plot_arb_txt(inputs.file, inputs.truth_file, inputs.param1, inputs.param2)        
     
 
 # if __name__ == '__main__':
