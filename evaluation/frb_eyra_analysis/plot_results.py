@@ -142,8 +142,8 @@ if __name__=='__main__':
         logging.info('Not displaying plots.')
 
     if inputs.json:
-        for fn in inputs.file:
-            plot_arb_json(inputs.file, inputs.param1, inputs.param2, sizeparam='snr')
+#        for fn in inputs.file:
+        plot_arb_json(inputs.file, inputs.param1, inputs.param2, sizeparam='snr')
     else:
         assert os.path.exists(inputs.truth_file), "No truth file or truth file does not exist"
         plot_arb_txt(inputs.file, inputs.truth_file, inputs.param1, inputs.param2)        
