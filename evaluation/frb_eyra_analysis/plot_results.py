@@ -109,7 +109,7 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
         plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.5)
         legend_str.append(fn.split('/')[-1])
 
-    plt.scatter(truth_df[x], truth_df[y], truth_df[msize], alpha=1, color='k')
+    plt.scatter(truth_df[x], truth_df[y], truth_df[msize], alpha=0.55, color='k')
     legend_str.append('Truth')
 
     plt.legend(legend_str)
@@ -135,7 +135,7 @@ if __name__=='__main__':
         logging.info('Not displaying plots.')
 
     if inputs.json:
-        plot_arb_json(fn, param1, param2, sizeparam='snr')
+        plot_arb_json(inputs.file, param1, param2, sizeparam='snr')
     else:
         plot_arb_txt(inputs.file, inputs.truth_file, inputs.param1, inputs.param2)        
     
