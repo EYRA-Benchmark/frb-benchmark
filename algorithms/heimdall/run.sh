@@ -1,7 +1,8 @@
 #!/bin/bash
-TMP_PATH="/tmp/heimdall"
-INPUT_PATH="/data/input/test_data"
-OUTPUT_PATH="/data/output"
+BASENAME=/tank/users/connor/eyra/data/ # this is /data in the master branch                                 
+TMP_PATH="/$BASENAME/heimdall"
+INPUT_PATH="$BASENAME/input/test_data"
+OUTPUT_PATH="$BASENAME/output"
 # Heimdall uses the highest frequency as its arrival time reference freq
 FREQ_REF_NAME='high' 
 FREQ_REF=$(python get_fil_header.py $INPUT_PATH $FREQ_REF_NAME)
