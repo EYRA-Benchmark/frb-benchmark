@@ -22,6 +22,9 @@ matplotlib.rcParams.update(params)
 
 from blind_detection import input_columns, truth_columns, Column
 
+markers = ['o', 'v', '*', 'P', 's', 'x']
+
+
 def manage_input(fn):
     """ Read in output json file
     """
@@ -70,10 +73,11 @@ def plot_arb_json(files, param1, param2, sizeparam='snr'):
         size_op = df_op_plot['out_'+sizeparam]
 
         legend_str.append(fn.split('/')[-1])
-        plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], size_op, alpha=0.65)
+        plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], 
+                    size_op, alpha=0.65, marker=marker[ii])
 
     legend_str.append('Truth')
-    plt.scatter(data_gt_x, data_gt_y, size_gt, color='k', alpha=0.65)
+    plt.scatter(data_gt_x, data_gt_y, size_gt, color='k', alpha=0.65, marker='d')
     plt.legend(legend_str)
     plt.xlabel(param1, fontsize=16)
     plt.ylabel(param2, fontsize=16)
@@ -82,7 +86,8 @@ def plot_arb_json(files, param1, param2, sizeparam='snr'):
 def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
-    truth_df = pd.read_csv(fntruth, names=truth_columns, comment='#', delim_whitespace=True, skiprows=1)
+    truth_df = pd.read_csv(fntruth, names=truth_columns, comment='#', 
+                           delim_whitespace=True, skiprows=1)
     freq_ref_truth = truth_df[Column.freq_ref][0]
 
     legend_str = []
@@ -109,14 +114,15 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
         msize = Column.width
 
     for fn in files:
-        input_df = pd.read_csv(fn, names=input_columns, comment='#', delim_whitespace=True, skiprows=1)
+        input_df = pd.read_csv(fn, names=input_columns, comment='#', 
+                               delim_whitespace=True, skiprows=1)
         freq_ref_cand = input_df[Column.freq_ref][0]
         input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
 
-        plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.5)
+        plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.5, marker=marker[ii])
         legend_str.append(fn.split('/')[-1])
 
-    plt.scatter(truth_df[x], truth_df[y], truth_df[msize], alpha=0.55, color='k')
+    plt.scatter(truth_df[x], truth_df[y], truth_df[msize], alpha=0.55, color='k', marker='d')
     legend_str.append('Truth')
 
     plt.legend(legend_str)
@@ -127,11 +133,16 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description="Generates plots to visualise output data",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-f', '--file', help='json or txt file(s)', type=str, nargs='+', required=True)
-    parser.add_argument('-truth_file', '--truth_file', help='must be a .txt file', type=str, required=False)
-    parser.add_argument('-json', '--json', help='json files as opposed to standard output', action='store_true')
-    parser.add_argument('-param1', '--param1', help='y-axis parameter (snr, toa, dm, width)', default='toa')
-    parser.add_argument('-param2', '--param2', help='x-axis parameter (snr, toa, dm, width)', default='dm')
+    parser.add_argument('-f', '--file', help='json or txt file(s)', type=str, 
+                        nargs='+', required=True)
+    parser.add_argument('-truth_file', '--truth_file', help='must be a .txt file', 
+                        type=str, required=False)
+    parser.add_argument('-json', '--json', help='json files as opposed to standard output', 
+                        action='store_true')
+    parser.add_argument('-param1', '--param1', help='y-axis parameter (snr, toa, dm, width)', 
+                        default='toa')
+    parser.add_argument('-param2', '--param2', help='x-axis parameter (snr, toa, dm, width)', 
+                        default='dm')
     parser.add_argument('-d', '--display_plots', help='Display plots', action='store_true')
 
     inputs = parser.parse_args()
