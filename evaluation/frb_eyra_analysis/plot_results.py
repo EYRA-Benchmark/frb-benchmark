@@ -41,13 +41,13 @@ def manage_input(files):
     
     return df_gt_plot, df_op_plot, data
 
-def plot_arb_json(fn, param1, param2, sizeparam='snr'):
+def plot_arb_json(files, param1, param2, sizeparam='snr'):
     """ Plot two parameters against one another for both 
     the ground_truth and the code output data
     """
     fig = plt.figure()
 
-    for ii, fn in enumerate(fn):
+    for ii, fn in enumerate(files):
         df_gt_plot, df_op_plot, data = manage_input(fn)
 
         matches = data['matches']
