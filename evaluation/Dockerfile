@@ -11,4 +11,4 @@ COPY setup.py .
 RUN pip install .    
 
 ENTRYPOINT ["sh", "-c"]
-CMD ["python frb_eyra_analysis/blind_detection.py /data/input/ground_truth --fn_cand_files=/data/input/implementation_output > /data/output"]
+CMD ["python frb_eyra_analysis/blind_detection.py > /tank/users/connor/eyra/data/output"]
