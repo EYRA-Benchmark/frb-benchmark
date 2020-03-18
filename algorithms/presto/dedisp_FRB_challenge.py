@@ -2,7 +2,20 @@ from __future__ import print_function
 from builtins import zip
 from builtins import range
 import os
+import sys
 
+import glob
+
+try:
+    basename = sys.argv[1]
+except:
+    basename = "/tank/users/connor/eyra/intermediate"
+
+try:
+    rawfiles = sys.argv[2]
+except:
+    rawfiles = "/tank/users/connor/eyra/input/test_data"
+    
 system = "ASKAP" # Needs to be one of the following
 
 systems = ["ASKAP", "APERTIF", "CHIME"]
@@ -52,13 +65,12 @@ dmspercalls = [[88, 76, 76],
 
 # Number of subbands
 nsub = 112 if system=="ASKAP" else 128 
-
+max_width_sec = 0.1
+snr_thresh = 6.0
 # The basename of the output files you want to use
-basename = "/tmp/intermediate"
-# The name of the raw data file (or files if you use wildcards) to use
-rawfiles = "/data/input/test_data"
 os.system("ln -s %s %s.fil" % (rawfiles, rawfiles))
 rawfiles = rawfiles+'.fil'
+
 # Loop over the DDplan plans
 for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in \
         zip(dDMs[index], dsubDMs[index], dmspercalls[index], downsamps[index], subcalls[index], startDMs[index]):
@@ -78,3 +90,4 @@ for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in \
         subnames = basename+"_DM%.2f.sub[0-9]*"%subDM
         myexecute("prepsubband -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s" %
                   (loDM, dDM, dmspercall, datdownsamp, basename, subnames))
+        myexecute("single_pulse_search.py -m %f -t %f -p -g %s.dat" % (max_width_sec, snr_thresh, subnames))
