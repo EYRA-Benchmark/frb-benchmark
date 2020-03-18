@@ -67,8 +67,8 @@ def plot_arb_json(fn, param1, param2, sizeparam='snr'):
     size_gt = df_gt_plot['in_'+sizeparam]
     size_op = df_op_plot['out_'+sizeparam]
 
-    plt.scatter(data_gt_x, data_gt_y, size_gt, color='k', alpha=0.5)
-    plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], size_op, color='C0', alpha=1)
+    plt.scatter(data_gt_x, data_gt_y, size_gt, color='k', alpha=0.65)
+    plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], size_op, color='C1', alpha=0.65)
 #    plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], size_op, color='C1', alpha=0.5)
     plt.legend(['Ground truth', 'Code output'])
     plt.xlabel(param1, fontsize=16)
