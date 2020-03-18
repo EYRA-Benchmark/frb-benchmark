@@ -74,8 +74,8 @@ def plot_arb_json(fn, param1, param2, sizeparam='snr'):
 def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
     fig = plt.figure()
 
-    df_truth = pd.read_csv(fntruth, names=truth_columns, delim_whitespace=True, skiprows=1)
-    plt.scatter(df_truth[Column.time], df_truth[Column.DM], df_truth[Column.SN], alpha=1, color='k')
+    truth_df = pd.read_csv(fntruth, names=truth_columns, delim_whitespace=True, skiprows=1)
+    plt.scatter(truth_df[Column.time], truth_df[Column.DM], truth_df[Column.SN], alpha=1, color='k')
     freq_ref_truth = truth_df[Column.freq_ref][0]
 
     legend_str = ['Truth']
