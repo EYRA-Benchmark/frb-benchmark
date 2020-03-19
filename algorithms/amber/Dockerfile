@@ -2,7 +2,6 @@
 FROM nvidia/opencl:devel-ubuntu18.04
 
 # Install all necessary system packages
-WORKDIR /
 RUN apt-get -qq -y update && apt-get -qq -y install \
     build-essential \
     git \
@@ -16,21 +15,25 @@ WORKDIR /usr/src/gtest/build
 RUN cmake .. && make
 RUN cp *.a /usr/lib
 
+# add frbbench user; UID should be same as arts on ARTS cluster
+RUN useradd -u 1006 -ms /bin/bash frbbench
+
 # Install AMBER
-WORKDIR /opt/amber
+WORKDIR /opt/frbbench/amber
 RUN git clone https://github.com/AA-ALERT/AMBER_setup.git -b development
 ENV SOURCE_ROOT="/opt/amber/src"
 ENV INSTALL_ROOT="/usr/local"
-WORKDIR /opt/amber/AMBER_setup
+WORKDIR /opt/frbbench/amber/AMBER_setup
 RUN ./amber.sh install development
 ENV LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"
 
 # Run AMBER for the challenge
-WORKDIR /amber_run
+WORKDIR /opt/frbbench
 COPY conf ./conf/
-COPY challenge_sprint.sh .
-COPY challenge.sh .
+COPY scenarios ./scenarios/
+COPY run.sh .
 COPY get_fil_header.py .
-RUN chmod u+x challenge.sh
-ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["/amber_run/challenge.sh"]
+RUN chmod a+x run.sh
+RUN chown -R frbbench /opt/frbbench
+USER frbbench
+CMD ["./run.sh"]
