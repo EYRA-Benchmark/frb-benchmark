@@ -377,6 +377,10 @@ def compare(input_df, truth_df):
     # time fix?
     #truth_df[Column.time] += 4148 * truth_df[Column.time] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
     input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
+
+    if freq_ref_cand<1200:
+        eprint("Assuming ASKAP, doing quick fix. Should not be permanent!")
+        input_df[Column.time] -= 0.655
     
     # cross reference columns
     truth_df[Column.input_index] = None
@@ -421,6 +425,8 @@ def compare(input_df, truth_df):
             input_df.loc[guess_index, Column.truth_index] = i
 
 
+        return t_err_cand, t_err_truth, dm_err_truth
+
 INPUT_PATH = '/data/input/implementation_output'
 GROUND_TRUTH_PATH = '/data/input/ground_truth'
 
@@ -428,16 +434,31 @@ INPUT_PATH = '/tank/users/connor/eyra/data/input/implementation_output'
 GROUND_TRUTH_PATH = '/tank/users/connor/eyra/data/input/ground_truth'
 
 if __name__ == "__main__":
-    truth_df = pandas.read_csv(GROUND_TRUTH_PATH, names=truth_columns, delim_whitespace=True, skiprows=1)
-    input_df = pandas.read_csv(INPUT_PATH, names=input_columns, delim_whitespace=True)
+    truth_df = pandas.read_csv(GROUND_TRUTH_PATH, names=truth_columns, 
+                               delim_whitespace=True, skiprows=1, comment='#')
+    input_df = pandas.read_csv(INPUT_PATH, names=input_columns, 
+                               delim_whitespace=True, comment='#')
 
-    compare(input_df, truth_df)
+    t_err_cand, t_err_truth, dm_err_truth = compare(input_df, truth_df)
 
     # rows from truth_df with corresponding input row
     correct_truth = truth_df[truth_df[Column.input_index].notnull()]
 
     # rows from input_df with corresponding truth row
     correct_input = input_df[input_df[Column.truth_index].notnull()]
+
+    param_dict = {Column.t_samp.value   : truth_df[Column.t_samp][0],
+                  Column.bw_mhz.value   : truth_df[Column.bw_mhz][0], 
+                  Column.freq_hi.value  : truth_df[Column.freq_hi][0],
+                  Column.n_chan.value   : int(truth_df[Column.n_chan][0]),
+                  Column.freq_ref.value : truth_df[Column.freq_ref][0],
+                  'spec_ind_max'        : truth_df[Column.spec_ind].max(),
+                  'spec_ind_min'        : truth_df[Column.spec_ind].min(),
+                  'DM_max'              : truth_df[Column.DM].max(),
+                  'DM_min'              : truth_df[Column.DM].min(),
+                  't_err_cand_sec'      : np.round(t_err_cand,5),
+                  't_err_truth_sec'     : np.round(t_err_truth,5),
+                  'dm_err_truth'        : np.round(dm_err_truth, 3)}
 
     # note that multiple Input rows could map to the same Truth row!
     # e.g. the following is not per se true: n_correct == len(input_df) - n_false_positive
@@ -454,6 +475,7 @@ if __name__ == "__main__":
             'column_names': [f'{column.name} ({column.value})' for column in list(input_df)],
             'data': json.loads(input_df.to_json(orient='values'))
         },
+        'data_params' : param_dict,
         # matches maps each matching input row index => truth row index.
         'matches': {input_index: truth_index for input_index, truth_index in correct_input[Column.truth_index].items()},
         'metrics': {
