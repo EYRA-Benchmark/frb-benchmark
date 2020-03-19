@@ -1,15 +1,20 @@
 #!/bin/bash
-TMP_PATH="/tank/users/connor/eyra/presto"
-BASE_PATH="/tank/users/connor/eyra/intermediate"
-INPUT_PATH="/tank/users/connor/eyra/input/test_data"
-OUTPUT_PATH="/tank/users/connor/eyra/output_presto"
+ROOT="/data/"
+BASE_NAME="/opt/frbbench/presto_run/output"  # has to match Dockerfile
+INPUT_PATH="$ROOT/input/test_data"
+OUTPUT_FILE="$ROOT/presto"
+
 # Heimdall uses the highest frequency as its arrival time reference freq
 FREQ_REF_NAME='high' 
 FREQ_REF=$(python get_fil_header.py $INPUT_PATH $FREQ_REF_NAME)
-mkdir -p $TMP_PATH
 
-python dedisp_FRB_challenge.py $BASE_PATH $INPUT_PATH
+# dedispersion
+python gen_dedisp_commands.py -s $SYSTEM --filterbank $INPUT_PATH -o $BASE_NAME > dedisp.sh
+./parallel.sh dedisp.sh
 
-# cols: DM, S/N, TIME, LOG_2_DOWNSAMPLE, FREQ_REF
-cat $BASE_PATH*.singlepulse | awk -F" " -v FREQ_REF="$FREQ_REF" '{ print $1 " " $2 " " $3 " " $4 " " FREQ_REF }' > $OUTPUT_PATH
-#cat $BASE_PATH*.singlepulse | awk -F" " -v FREQ_REF="$FREQ_REF" '{ print $1 " " $2 " " $3 " " $4 " " FREQ_REF }' > $OUTPUT_PATH
+# single pulse search
+python gen_sps_commands.py $BASE_NAME*dat > sps.sh
+./parallel.sh sps.sh
+
+# cols: DM, S/N, TIME, DOWNSAMPLE, FREQ_REF
+cat $BASE_PATH*.singlepulse | awk -F" " -v FREQ_REF="$FREQ_REF" '{ print $1 " " $2 " " $3 " " $4 " " FREQ_REF }' > $OUTPUT_FILE

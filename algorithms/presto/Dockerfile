@@ -1,7 +1,8 @@
 FROM gcc:9
 WORKDIR /root/install
 
-RUN useradd -ms /bin/bash frbbench
+# UID has to match arts UID on ARTS cluster
+RUN useradd -u 1006 -ms /bin/bash frbbench
 
 # install cmake 
 ENV DEBIAN_FRONTEND noninteractive
@@ -19,9 +20,6 @@ RUN apt-get -y update && \
 RUN apt-get -y install tcsh libgl1-mesa-dev libgsl0-dev libblas-dev liblapack-dev&& \
     apt-get clean
 
-
-RUN mkdir -p /opt/frbbench && \
-    chown frbbench /opt/frbbench
 
 WORKDIR /opt/frbbench
 
@@ -44,10 +42,10 @@ RUN /opt/frbbench/tempo/prepare && \
     LDFLAGS="-L/opt/frbbench/miniconda/lib" \
     CPPFLAGS="-I/opt/frbbench/miniconda/include" \
     ./configure --prefix=/opt/frbbench/tempo --with-blas=mkl_rt --with-lapack=mkl_rt&& \
-    make && \
+    make -j && \
     make install && \
     cd util/print_resid && \
-    make
+    make -j
 
 ENV PATH="/opt/frbbench/miniconda/bin:/opt/frbbench/bin:${PATH}"
 
@@ -61,7 +59,6 @@ RUN sync
 # non-standard-Anaconda packages
 RUN pip install healpy line_profiler jplephem corner numdifftools 
 
-USER root
 RUN sed -i -e "s#main#main non-free#g" /etc/apt/sources.list
 RUN apt-get update && apt-get -y install pgplot5 libfftw3-dev libcfitsio-dev libopenblas-dev
 
@@ -87,15 +84,22 @@ RUN git clone https://github.com/scottransom/presto.git
 WORKDIR $PRESTO/src
 RUN sed -i s/4000\.0/10000\.0/g /opt/frbbench/presto/src/prepsubband_cmd.c &&\
     make prep && \
-    make
+    make -j
 
 WORKDIR $PRESTO
 RUN pip install futures pyslalib
 RUN python setup.py install
 
+WORKDIR /opt/frbbench/presto_run
+RUN chown frbbench /opt/frbbench/presto_run
+
 USER frbbench
-WORKDIR /home/frbbench
 
-COPY dedisp_FRB_challenge.py /home/frbbench
+COPY gen_dedisp_commands.py .
+COPY gen_sps_commands.py .
+COPY parallel.sh .
+COPY run.sh .
+COPY get_fil_header.py .
 
-ENTRYPOINT ["python", "dedisp_FRB_challenge.py"]
+ENTRYPOINT ["bash", "-c"]
+CMD ["./run.sh"]

@@ -68,8 +68,8 @@ nsub = 112 if system=="ASKAP" else 128
 max_width_sec = 0.1
 snr_thresh = 6.0
 # The basename of the output files you want to use
-os.system("ln -s %s %s.fil" % (rawfiles, rawfiles))
-rawfiles = rawfiles+'.fil'
+#os.system("ln -s %s %s.fil" % (rawfiles, rawfiles))
+#rawfiles = rawfiles+'.fil'
 
 # Loop over the DDplan plans
 for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in \
@@ -83,11 +83,11 @@ for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in \
     for ii in range(subcall):
         subDM = startDM + (ii+0.5)*dsubDM
         # First create the subbands
-        myexecute("prepsubband -sub -subdm %.2f -nsub %d -downsamp %d -o %s %s" %
+        myexecute("prepsubband -nobary -filterbank -sub -subdm %.2f -nsub %d -downsamp %d -o %s %s" %
                   (subDM, nsub, subdownsamp, basename, rawfiles))
         # And now create the time series
         loDM = startDM + ii*dsubDM
         subnames = basename+"_DM%.2f.sub[0-9]*"%subDM
-        myexecute("prepsubband -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s" %
+        myexecute("prepsubband -nobary -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s" %
                   (loDM, dDM, dmspercall, datdownsamp, basename, subnames))
-        myexecute("single_pulse_search.py -m %f -t %f -p -g %s.dat" % (max_width_sec, snr_thresh, subnames))
+myexecute("single_pulse_search.py -m %f -t %f -p -g %s*.dat" % (max_width_sec, snr_thresh, basename))
