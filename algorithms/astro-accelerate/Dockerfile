@@ -5,9 +5,8 @@ FROM nvidia/cuda:8.0-devel-ubuntu16.04
 # To get rid of "(TERM is not set, so the dialog frontend is not usable.)"
 ARG DEBIAN_FRONTEND=noninteractive
 
-# TODO: remove vim
 RUN apt-get update \
-    && apt-get install -y build-essential git wget python3 python3-pip vim-nox\
+    && apt-get install -y build-essential git wget python3 python3-pip \
     && pip3 install numpy\
     && wget https://github.com/Kitware/CMake/releases/download/v3.15.1/cmake-3.15.1-Linux-x86_64.sh \
     && mkdir /opt/cmake\
