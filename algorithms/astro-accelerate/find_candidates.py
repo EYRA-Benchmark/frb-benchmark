@@ -35,8 +35,9 @@ dm4 = aa_py_dm(500, 900, 0.4, 2, 2)
 dm5 = aa_py_dm(900, 1200, 0.6, 4, 4)
 dm6 = aa_py_dm(1200, 1500, 0.8, 4, 4)
 dm7 = aa_py_dm(1500, 2000, 1.0, 4, 4)
-#dm8 = aa_py_dm(2000, 3000, 2.0, 8, 8)
-dm_list = np.array([dm1, dm2, dm3, dm4, dm5, dm6, dm7],dtype=aa_py_dm)
+dm8 = aa_py_dm(2000, 3000, 2.0, 8, 8)
+dm9 = aa_py_dm(3000, 10000, 5.0, 16, 16)
+dm_list = np.array([dm1, dm2, dm3, dm4, dm5, dm6, dm7, dm8, dm9],dtype=aa_py_dm)
 
 # Create ddtr_plan
 ddtr_plan = aa_py_ddtr_plan(dm_list)
@@ -91,11 +92,11 @@ while (pipeline.run()):
         start = time.time()
         if (nCandidates > 0):
             (tmp_dm, tmp_snr, tmp_time_sample, tmp_time, tmp_width) = SPD.scale(metadata, pipeline, ddtr_plan, ts_inc, nCandidates, dm, ts, snr, width, c_range, c_tchunk)
-        DM.append(tmp_dm)
-        SNR.append(tmp_snr)
-        TS.append(tmp_time_sample)
-        TIME.append(tmp_time)
-        WIDTH.append(tmp_width)
+            DM.append(tmp_dm)
+            SNR.append(tmp_snr)
+            TS.append(tmp_time_sample)
+            TIME.append(tmp_time)
+            WIDTH.append(tmp_width)
         end = time.time()
         # Write the candidates to disk
         print(bcolors.WARNING + "Time to find maximum: " + str(end - start) + bcolors.ENDC)
