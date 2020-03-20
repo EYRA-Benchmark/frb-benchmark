@@ -1,0 +1,50 @@
+version: '3'
+services:
+    amber:
+        build: algorithms/amber
+        volumes:
+            - /tank/users/connor/eyra/data:/data
+            # temporary so we can access the data:
+            - /tank/users/connor/eyra/:/tank/users/connor/eyra/
+        environment:
+            NVIDIA_VISIBLE_DEVICES: 0
+            #NBATCH: 4440 # 500 FRB file; 1024 samples
+            NBATCH: 7367 # 10k FRB file; 10240 samples
+
+    heimdall:
+        build: algorithms/heimdall
+        volumes:
+            - /tank/users/connor/eyra/data:/data
+            # temporary so we can access the data:
+            - /tank/users/connor/eyra/:/tank/users/connor/eyra/
+        environment:
+            NVIDIA_VISIBLE_DEVICES: 1
+
+    fredda:
+        build: algorithms/fredda
+        volumes:
+            - /tank/users/connor/eyra/data:/data
+            # temporary so we can access the data:
+            - /tank/users/connor/eyra/:/tank/users/connor/eyra/
+        environment:
+            NVIDIA_VISIBLE_DEVICES: 2
+
+    presto:
+        build: algorithms/presto
+        volumes:
+            - /tank/users/connor/eyra/data:/data
+            # temporary so we can access the data:
+            - /tank/users/connor/eyra/:/tank/users/connor/eyra/
+        environment:
+            # max number of jobs to run in parallel
+            MAXJOBS: 8
+            SYSTEM: ASKAP
+
+    astro-accelerate:
+        build: algorithms/astro-accelerate
+        volumes:
+            - /tank/users/connor/eyra/data:/data
+            # temporary so we can access the data:
+            - /tank/users/connor/eyra/:/tank/users/connor/eyra/
+        environment:
+            NVIDIA_VISIBLE_DEVICES: 3
