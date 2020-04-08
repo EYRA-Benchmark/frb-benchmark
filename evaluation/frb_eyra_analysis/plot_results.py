@@ -23,7 +23,10 @@ matplotlib.rcParams.update(params)
 from blind_detection import input_columns, truth_columns, Column
 
 markers = ['o', 'v', '*', 'P', 's', 'x']
-
+label_name = {'toa': 'Time (s)',
+              'dm' : 'DM (pc cm**-3)', 
+              'width' : 'Pulse width (s)',
+              'snr' : 'S/N'}
 
 def manage_input(fn):
     """ Read in output json file
@@ -50,8 +53,11 @@ def plot_arb_json(files, param1, param2, sizeparam='snr'):
     """
     fig = plt.figure()
     legend_str = []
+    
     for ii, fn in enumerate(files):
         df_gt_plot, df_op_plot, data = manage_input(fn)
+#        sigind = np.where(df_gt_plot['in_snr']<10.0)[0]
+#        print(sigind)
 
         matches = data['matches']
         ind_matches_ = matches.keys()
@@ -74,13 +80,13 @@ def plot_arb_json(files, param1, param2, sizeparam='snr'):
 
         legend_str.append(fn.split('/')[-1])
         plt.scatter(data_op_x[ind_matches], data_op_y[ind_matches], 
-                    size_op, alpha=0.65, marker=markers[ii])
+                    5*size_op, alpha=0.55, marker=markers[ii])
 
     legend_str.append('Truth')
-    plt.scatter(data_gt_x, data_gt_y, size_gt, color='k', alpha=0.65, marker='d')
+    plt.scatter(data_gt_x, data_gt_y, 2*size_gt, color='k', alpha=0.25, marker='d')
     plt.legend(legend_str)
-    plt.xlabel(param1, fontsize=16)
-    plt.ylabel(param2, fontsize=16)
+    plt.xlabel(label_name[param1], fontsize=16)
+    plt.ylabel(label_name[param2], fontsize=16)
     plt.show()
 
 def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
@@ -113,16 +119,16 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
     elif sizeparam in ('Width', 'width'):
         msize = Column.width
 
-    for fn in files:
+    for ii,fn in enumerate(files):
         input_df = pd.read_csv(fn, names=input_columns, comment='#', 
                                delim_whitespace=True, skiprows=1)
         freq_ref_cand = input_df[Column.freq_ref][0]
         input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
 
-        plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.5, marker=markers[ii])
+        plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.55, marker=markers[ii])
         legend_str.append(fn.split('/')[-1])
-
-    plt.scatter(truth_df[x], truth_df[y], truth_df[msize], alpha=0.55, color='k', marker='d')
+        
+    plt.scatter(truth_df[x], truth_df[y], 0.33*truth_df[msize], alpha=0.25, color='k', marker='d')
     legend_str.append('Truth')
 
     plt.legend(legend_str)
@@ -130,6 +136,43 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
     plt.xlabel('Time (s)', fontsize=16)
     plt.show()
 
+def plot_trigger_stats(files, fntruth):
+#    np.hist(input_df[Column.SN],cumulative=True, bins=100, histtype='step', normed=True, range=(0,50))
+    truth_df = pd.read_csv(fntruth, names=truth_columns, comment='#',
+                           delim_whitespace=True, skiprows=1)
+    legend_str = []
+    plt.subplot(121)
+    plt.hist(truth_df[Column.SN],cumulative=True, bins=100, 
+             histtype='step', normed=True, range=(0,50), lw=2.5,
+             color='k', alpha=.85)
+    plt.subplot(122)
+    plt.hist(truth_df[Column.DM],bins=100,normed=True,histtype='step',lw=2.5,color='k',alpha=0.85)
+    legend_str.append('Truth')
+    for ii,fn in enumerate(files):
+        input_df = pd.read_csv(fn, names=input_columns, comment='#',
+                               delim_whitespace=True, skiprows=1)
+        freq_ref_cand = input_df[Column.freq_ref][0]
+        plt.subplot(121)
+        plt.hist(input_df[Column.SN],cumulative=True, bins=100, histtype='step', normed=True, range=(0,50))
+        plt.subplot(122)
+        plt.hist(input_df[Column.DM],bins=100,normed=True,histtype='step', log=True)
+#        plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.25, marker=markers[ii])
+        legend_str.append(fn.split('/')[-1])    
+
+    plt.subplot(121)
+    plt.xlim(0,40)
+    plt.xlabel('S/N', fontsize=16)
+    plt.ylabel('N(<S/N)', fontsize=16)
+    plt.legend(legend_str, loc=4)
+    plt.subplot(122)
+    plt.xlabel('DM', fontsize=16)
+    plt.ylabel('N(DM)', fontsize=16)
+#    plt.legend(legend_str, loc=4)
+    plt.suptitle('All triggers', fontsize=25)
+#    plt.tight_layout()
+    plt.show()
+
+    
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description="Generates plots to visualise output data",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -148,6 +191,7 @@ if __name__=='__main__':
     inputs = parser.parse_args()
 
     #assert len(sys.argv)>2, "Expecting param1 param2 [filename]\nIf no file name is given, assuming data/output"
+    inputs.file.sort()
 
     if not inputs.display_plots:
         logging.info('Not displaying plots.')
@@ -158,4 +202,4 @@ if __name__=='__main__':
     else:
         assert os.path.exists(inputs.truth_file), "No truth file or truth file does not exist"
         plot_arb_txt(inputs.file, inputs.truth_file, inputs.param1, inputs.param2)        
-    
+        plot_trigger_stats(inputs.file, inputs.truth_file)

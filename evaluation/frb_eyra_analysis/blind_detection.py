@@ -286,7 +286,6 @@ class DetectionDecision:
 
         val = dmtarr_function(t0_guess, dm_guess)
         decision = val > thresh
-
         return decision[0], dmtarr, extent
 
 
@@ -376,7 +375,8 @@ def compare(input_df, truth_df):
     
     # time fix?
     #truth_df[Column.time] += 4148 * truth_df[Column.time] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
-    input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
+    input_df[Column.time] -= 4148 * input_df[Column.DM] * \
+                             (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
 
     if freq_ref_cand<1200:
         eprint("Assuming ASKAP, doing quick fix. Should not be permanent!")
@@ -394,6 +394,7 @@ def compare(input_df, truth_df):
 
     for i in range(len(truth_df)):
         truth_row = truth_df.iloc[i]
+
         D = DetectionDecision(
             dm=truth_row[Column.DM],
             t0=truth_row[Column.time],
@@ -404,7 +405,6 @@ def compare(input_df, truth_df):
             input_df=input_df,
             t_err=t_err_cand,
         )
-
         if guess_index is None:
             continue
 
@@ -424,8 +424,7 @@ def compare(input_df, truth_df):
             truth_df.loc[i, Column.input_index] = guess_index
             input_df.loc[guess_index, Column.truth_index] = i
 
-
-        return t_err_cand, t_err_truth, dm_err_truth
+    return t_err_cand, t_err_truth, dm_err_truth
 
 INPUT_PATH = '/data/input/implementation_output'
 GROUND_TRUTH_PATH = '/data/input/ground_truth'
