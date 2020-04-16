@@ -14,8 +14,7 @@ FREQ_REF=$(python get_fil_header.py $file $FREQ_REF_NAME)
 
 # run AMBER
 # step 4 config (DM > 5000) not yet working
-#for step in {1..4}; do
-for step in {1..3}; do
+for step in {1..4}; do
     source scenarios/askap_step${step}.sh
     output="amber_step${step}"
     int_steps=integration_steps_askap_step${step}.conf
