@@ -4,10 +4,15 @@
 # You are free to modify and redistribute this code as long
 # as you do not remove the above attribution and reasonably
 # inform receipients that you have modified the original work.
+#
+# Modified for ARTS cluster by Leon Oostrum
 
-FROM nvidia/cuda:10.1-devel-ubuntu16.04
-#FROM nvidia/cuda:9.2-devel-ubuntu18.04
+# ARTS cluster has driver 390.25, max CUDA version 9.1
+FROM nvidia/cuda:9.1-devel-ubuntu17.04
 MAINTAINER Xinping Deng "xinping.deng@gmail.com"
+
+# unsupported distro repos are moved
+RUN sed -i -re 's/([a-z]{2}\.)?archive.ubuntu.com|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
 
 # To get rid of "(TERM is not set, so the dialog frontend is not usable.)"
 ARG DEBIAN_FRONTEND=noninteractive
@@ -29,8 +34,8 @@ RUN pip install --upgrade pip -U && \
     pip install -U setuptools wheel numpy scipy ephem matplotlib katcp tornado astropy cmd2 -U
 
 # Define directory for source code, OSTYPE and installation directory
-ENV SOURCE           /root
-ENV CRAFT            /root
+ENV SOURCE           /opt/frbbench
+ENV CRAFT            /opt/frbbench
 ENV PREFIX           /usr/local
 ENV INSTALL_BIN      $PREFIX/bin
 ENV INSTALL_INCLUDES $PREFIX/include
@@ -62,52 +67,32 @@ ENV CUB_PATH=$SOURCE/include/cub-1.8.0/cub
 
 # Install psrdada
 WORKDIR $SOURCE
-RUN git clone https://github.com/xinpingdeng/psrdada.git
+ADD psrdada.tar.gz $SOURCE/
 WORKDIR $SOURCE/psrdada
+
 RUN ./bootstrap && \
     ./configure --prefix=$PREFIX --with-cuda-include-dir=$CUDA_INCLUDE --with-cuda-lib-dir=$CUDA_LIB && \
-    make -j $(nproc)&& \
+    make -j && \
     make install
 WORKDIR $SOURCE
 RUN rm -rf psrdada
-
-## install psrdada
-#WORKDIR $SOURCE/include
-#RUN git clone git://git.code.sf.net/p/psrdada/code psrdada 
-#WORKDIR $SOURCE/include/psrdada
-#
-#COPY PsrdadaMakefile.am Makefile.am
-#
-#RUN pwd && mkdir build/ && \
-#    ./bootstrap && \
-#    ./configure --prefix=/usr/local && \
-#    make && \
-#    make install && \
-#    make clean
-#
-#ENV CUDA=/usr/local/cuda
 
 # install FREDDA
 ENV CUDA=/usr/local/cuda
 ENV FREDDA=$SOURCE/craft/cuda-fdmt/cudafdmt/src/
 WORKDIR $FREDDA
 ENV PATH=$FREDDA:$PATH
-#RUN cp fredda.mk.template fredda.mk &&\
-#    sed -i s/60/70/g fredda.mk &&\
-#    make; \
-#    cp Makefile Makefile.old && \
-#    sed -i s/-std=c\+\+11//g Makefile &&\
-#    make; \
-#    cp Makefile.old Makefile &&\
-#    make
 RUN cp fredda.mk.template fredda.mk &&\
-    sed -i s/60/70/g fredda.mk &&\
-    make
-#-j 24
+    sed -i s/60/61/g fredda.mk &&\
+    make -j 
 
-COPY run.sh /
-COPY get_fil_header.py /
+# add frbbench user; UID should be same as arts on ARTS cluster
+RUN useradd -u 1006 -ms /bin/bash frbbench
+WORKDIR /opt/frbbench
+COPY run.sh .
+COPY get_fil_header.py .
+RUN chown -R frbbench /opt/frbbench
+RUN chmod a+x run.sh
+USER frbbench
 
-RUN chmod a+x /run.sh
-
-CMD ["/run.sh"]
+CMD ["./run.sh"]
