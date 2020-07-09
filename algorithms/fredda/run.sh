@@ -3,7 +3,6 @@
 BASENAME=/tank/users/connor/eyra/data # this is /data in the master branch    
 #BASENAME=/data
 TMP_PATH="/opt/frbbench/fredda_tmp"
-TMP_PATH=$BASENAME/fredda_tmp
 INPUT_PATH="$BASENAME/input/test_data"
 OUTPUT_PATH="$BASENAME/fredda"
 
