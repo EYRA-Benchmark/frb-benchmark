@@ -19,6 +19,7 @@ import matplotlib as mpl
 #from frb_eyra_analysis import simulate_frb
 #from frb_eyra_analysis import tools
 
+k_DM=1e3/0.241
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -75,7 +76,6 @@ class DetectionDecision:
         """
 
         undispersed_arrival_time = 0.5 * ntime * self.dt
-        #        undispersed_arrival_time -= 4148*self.dm*(self.freq_hi_MHz**-2)
         sp = simpulse.single_pulse(
             ntime,
             self._nfreq,
@@ -215,6 +215,7 @@ class DetectionDecision:
         t_stat = np.abs(self._t0 - t0_guess)
 
         decision = (dm_stat < dm_err) & (t_stat < t_err)
+        print(self._dm - dm_guess)
 
         return decision
 
@@ -355,7 +356,7 @@ def get_truth_box_dims(truth_df):
     dm_max = dm_arr.max()
 
     t_err = 2*width_obs_max
-    dm_err = width_obs_max / (4148.0 * np.abs(freq_hi**-2-freq_low**-2))
+    dm_err = width_obs_max / (k_DM * np.abs(freq_hi**-2-freq_low**-2))
 
     return t_err, dm_err
 
@@ -375,12 +376,12 @@ def compare(input_df, truth_df):
     
     # time fix?
     #truth_df[Column.time] += 4148 * truth_df[Column.time] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
-    input_df[Column.time] -= 4148 * input_df[Column.DM] * \
+    input_df[Column.time] -= k_DM * input_df[Column.DM] * \
                              (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
 
-    if freq_ref_cand<1200:
-        eprint("Assuming ASKAP, doing quick fix. Should not be permanent!")
-        input_df[Column.time] -= 0.655
+#    if freq_ref_cand<1200:
+#        eprint("Assuming ASKAP, doing quick fix. Should not be permanent!")
+#        input_df[Column.time] -= 0.655
     
     # cross reference columns
     truth_df[Column.input_index] = None
@@ -418,7 +419,9 @@ def compare(input_df, truth_df):
             dm_err=dm_err_truth,
             t_err=t_err_truth,
         )
-
+#        print(t_err_truth, dm_err_truth)
+#        print(dec_bool, guess_row[Column.time], guess_row[Column.DM])
+#        print(truth_row[Column.time],truth_row[Column.DM])
         if dec_bool:
             # set references to one another
             truth_df.loc[i, Column.input_index] = guess_index
