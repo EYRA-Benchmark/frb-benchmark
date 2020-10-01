@@ -7,7 +7,7 @@ services:
             # temporary so we can access the data:
             - /tank/users/connor/eyra/:/tank/users/connor/eyra/
         environment:
-            NVIDIA_VISIBLE_DEVICES: 0
+            #NVIDIA_VISIBLE_DEVICES: 0  # commented to let AMBER use all 4 GPUs
             #NBATCH: 4440 # 500 FRB file; 1024 samples
             NBATCH: 7367 # 10k FRB file; 10240 samples
 
