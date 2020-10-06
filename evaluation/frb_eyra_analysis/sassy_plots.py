@@ -100,7 +100,7 @@ def snr_snr_plot(df_gt, df_op, gt_indices, op_indices, params, title = None, sav
         
 
 def recall_1d(df_gt, gt_indices, param, figobj=None, 
-              recall_bins = 10, hist_bins = 100, 
+              recall_bins = 100, hist_bins = 500, 
               title=None, save=False, show=True, plot_truth=True,
               sigthresh=0.0):
     """
@@ -118,6 +118,10 @@ def recall_1d(df_gt, gt_indices, param, figobj=None,
     :returns: axis object of the plot 
     """
     
+    param_label = ({'snr':'S/N',
+                    'dm':'DM (pc cm**-3)',
+                    'width':'Width (ms)'})[param]
+
     df_out = df_gt.iloc[gt_indices]
 
     if 'dm' in param or 'width' in param:
@@ -144,22 +148,25 @@ def recall_1d(df_gt, gt_indices, param, figobj=None,
     else:
         fig, ax1 = figobj
 
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('Number')
-    if 'snr' in param or 'width' in param:
-        if plot_truth:
-            ax2.hist(np.log10(df_gt[f'in_{param}']), alpha=0.25, bins=hist_bins)
-    else:
-        if plot_truth:
-            ax2.hist(df_gt[f'in_{param}'], alpha=0.25, bins=hist_bins)
-
     if plot_truth:
+        ax2 = ax1.twinx()
         ax2.tick_params(axis='y')
-        ax1.set_xlabel(f'{param}')
+        ax1.set_xlabel(f'{param_label}')
         ax1.set_ylabel('Recall')
         ax1.tick_params(axis='y')
         ax1.grid()
+
     ax1.step(bin_mid, recall)
+
+    if 'snr' in param or 'width' in param:
+        if plot_truth:
+            ax2.hist(np.log10(df_gt[f'in_{param}']), alpha=0.25, bins=hist_bins)
+            ax2.set_ylabel('Number simulated')
+    else:
+        if plot_truth:
+            ax2.hist(df_gt[f'in_{param}'], alpha=0.25, bins=hist_bins)
+            ax2.set_ylabel('Number simulated')
+
 #    if 'snr' in param or 'width' in param:
 #        ax1.set_xscale('log')
 
@@ -167,11 +174,6 @@ def recall_1d(df_gt, gt_indices, param, figobj=None,
         pass
 #        plt.suptitle(f'{title}', y=1.01)
     fig.tight_layout()    
-    if save:
-        figname = title+f'_1d_recall_{param}' if title else f'1d_recall_{param}' 
-        plt.savefig(f'{figname}.png', bbox_inches='tight')
-    if show:
-        plt.show()
         
     return ax1
 
@@ -237,7 +239,7 @@ if __name__ == '__main__':
         
         logging.info(f'Reading and cleaning data from {file} for plotting.')
         df_gt_plot, df_op_plot, gt_match_indices, op_match_indices = manage_input(file)
-        
+
         if inputs.snr_snr_plot:
             logging.info(f'Generating SNR-SNR plot for {title}.')
             snr_snr_plot(df_gt_plot, df_op_plot, 
@@ -253,11 +255,16 @@ if __name__ == '__main__':
             logging.info(f'Generating 1D recall plot for {title}.')
             for param in inputs.params:
                 ax1 = recall_1d(df_gt_plot, gt_match_indices, param, 
-                          figobj=figobj, recall_bins=10, 
-                          hist_bins=30, title=title, save=False, show=False, plot_truth=plot_truth, 
-                                sigthresh=inputs.sig_cut)
+                          figobj=figobj, recall_bins=25, 
+                          hist_bins=60, title=title, save=False, show=False, plot_truth=plot_truth, 
+                          sigthresh=inputs.sig_cut)
 #                         show=inputs.display_plots)
 
+    ax1.legend(legend_str)
+
     if inputs.display_plots:
-        ax1.legend(legend_str)
         plt.show()
+
+    if True:
+        figname = f'_1d_recall_{param}' if title else f'1d_recall_{param}' 
+        plt.savefig(f'{figname}.png', bbox_inches='tight')
