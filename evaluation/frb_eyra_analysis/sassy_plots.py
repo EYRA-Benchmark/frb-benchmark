@@ -247,18 +247,19 @@ if __name__ == '__main__':
                          title=algo_name, save=True, show=inputs.display_plots)
 
     for param in inputs.params:
+        if not inputs.recall_plot:
+            continue
+
         legend_str=[]
         for ii,file in enumerate(inputs.file):
-            df_gt_plot, df_op_plot, gt_match_indices, op_match_indices = manage_input(file)
-            algo_name = os.path.splitext(file)[0].split('/')[-1]
-            legend_str.append(algo_name)
-
-            if inputs.recall_plot:
                 if ii==0:
                     figobj = plt.subplots()
                     plot_truth = True
                 else:
                     plot_truth = False
+            df_gt_plot, df_op_plot, gt_match_indices, op_match_indices = manage_input(file)
+            algo_name = os.path.splitext(file)[0].split('/')[-1]
+            legend_str.append(algo_name)
 
                 logging.info(f'Generating 1D recall plot for {algo_name}.')
                 ax1 = recall_1d(df_gt_plot, gt_match_indices, param, 
