@@ -261,13 +261,13 @@ if __name__ == '__main__':
             algo_name = os.path.splitext(file)[0].split('/')[-1]
             legend_str.append(algo_name)
 
-                logging.info(f'Generating 1D recall plot for {algo_name}.')
-                ax1 = recall_1d(df_gt_plot, gt_match_indices, param, 
-                                  figobj=figobj, recall_bins=25, 
-                                  hist_bins=60, title=algo_name, save=False, 
-                                  show=False, 
-                                  plot_truth=plot_truth, 
-                                  sigthresh=inputs.sig_cut)
+            logging.info(f'Generating 1D recall plot for {algo_name}.')
+            ax1 = recall_1d(df_gt_plot, gt_match_indices, param, 
+                              figobj=figobj, recall_bins=25, 
+                              hist_bins=60, title=algo_name, save=False, 
+                              show=False, 
+                              plot_truth=plot_truth, 
+                              sigthresh=inputs.sig_cut)
 
         ax1.legend(legend_str)
 
