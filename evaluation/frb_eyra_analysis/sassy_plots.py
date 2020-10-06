@@ -252,11 +252,11 @@ if __name__ == '__main__':
 
         legend_str=[]
         for ii,file in enumerate(inputs.file):
-                if ii==0:
-                    figobj = plt.subplots()
-                    plot_truth = True
-                else:
-                    plot_truth = False
+            if ii==0:
+                figobj = plt.subplots()
+                plot_truth = True
+            else:
+                plot_truth = False
             df_gt_plot, df_op_plot, gt_match_indices, op_match_indices = manage_input(file)
             algo_name = os.path.splitext(file)[0].split('/')[-1]
             legend_str.append(algo_name)
