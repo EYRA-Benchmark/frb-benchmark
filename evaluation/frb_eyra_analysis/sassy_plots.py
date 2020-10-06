@@ -232,10 +232,10 @@ if __name__ == '__main__':
     if not inputs.display_plots:
         logging.info('Not displaying plots.')
     
-
+    legend_str=[]
     for ii,file in enumerate(inputs.file):
-        title = os.path.splitext(file)[0].split('/')[-1]
-        legend_str.append(title)
+        algo_name = os.path.splitext(file)[0].split('/')[-1]
+        legend_str.append(algo_name)
         
         logging.info(f'Reading and cleaning data from {file} for plotting.')
         df_gt_plot, df_op_plot, gt_match_indices, op_match_indices = manage_input(file)
@@ -244,11 +244,12 @@ if __name__ == '__main__':
             logging.info(f'Generating SNR-SNR plot for {title}.')
             snr_snr_plot(df_gt_plot, df_op_plot, 
                          gt_match_indices, op_match_indices, ['dm', 'width', 'toa'], 
-                         title=title, save=True, show=inputs.display_plots)
+                         title=algo_name, save=True, show=inputs.display_plots)
 
     for param in input.params:
         legend_str=[]
-
+        algo_name = os.path.splitext(file)[0].split('/')[-1]
+        legend_str.append(algo_name)
         for ii,file in enumerate(inputs.file):
             df_gt_plot, df_op_plot, gt_match_indices, op_match_indices = manage_input(file)
 
