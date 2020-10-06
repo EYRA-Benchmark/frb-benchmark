@@ -248,10 +248,10 @@ if __name__ == '__main__':
 
     for param in inputs.params:
         legend_str=[]
-        algo_name = os.path.splitext(file)[0].split('/')[-1]
-        legend_str.append(algo_name)
         for ii,file in enumerate(inputs.file):
             df_gt_plot, df_op_plot, gt_match_indices, op_match_indices = manage_input(file)
+            algo_name = os.path.splitext(file)[0].split('/')[-1]
+            legend_str.append(algo_name)
 
             if inputs.recall_plot:
                 if ii==0:
@@ -261,11 +261,11 @@ if __name__ == '__main__':
                     plot_truth = False
                 logging.info(f'Generating 1D recall plot for {algo_name}.')
                 ax1 = recall_1d(df_gt_plot, gt_match_indices, param, 
-                              figobj=figobj, recall_bins=25, 
-                              hist_bins=60, title=algo_name, save=False, show=False, 
-                              plot_truth=plot_truth, 
-                              sigthresh=inputs.sig_cut)
-    #                         show=inputs.display_plots)
+                                  figobj=figobj, recall_bins=25, 
+                                  hist_bins=60, title=algo_name, save=False, 
+                                  show=False, 
+                                  plot_truth=plot_truth, 
+                                  sigthresh=inputs.sig_cut)
 
         ax1.legend(legend_str)
 
