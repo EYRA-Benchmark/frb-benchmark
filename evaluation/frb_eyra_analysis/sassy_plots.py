@@ -241,7 +241,7 @@ if __name__ == '__main__':
         df_gt_plot, df_op_plot, gt_match_indices, op_match_indices = manage_input(file)
 
         if inputs.snr_snr_plot:
-            logging.info(f'Generating SNR-SNR plot for {title}.')
+            logging.info(f'Generating SNR-SNR plot for {algo_name}.')
             snr_snr_plot(df_gt_plot, df_op_plot, 
                          gt_match_indices, op_match_indices, ['dm', 'width', 'toa'], 
                          title=algo_name, save=True, show=inputs.display_plots)
