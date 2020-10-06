@@ -267,6 +267,7 @@ if __name__ == '__main__':
                                   show=False, 
                                   plot_truth=plot_truth, 
                                   sigthresh=inputs.sig_cut)
+                plt.show()
 
         ax1.legend(legend_str)
 
