@@ -259,10 +259,10 @@ if __name__ == '__main__':
                     plot_truth = True
                 else:
                     plot_truth = False
-                logging.info(f'Generating 1D recall plot for {title}.')
+                logging.info(f'Generating 1D recall plot for {algo_name}.')
                 ax1 = recall_1d(df_gt_plot, gt_match_indices, param, 
                               figobj=figobj, recall_bins=25, 
-                              hist_bins=60, title=title, save=False, show=False, 
+                              hist_bins=60, title=algo_name, save=False, show=False, 
                               plot_truth=plot_truth, 
                               sigthresh=inputs.sig_cut)
     #                         show=inputs.display_plots)
@@ -273,5 +273,5 @@ if __name__ == '__main__':
             plt.show()
 
         if True:
-            figname = f'_1d_recall_{param}' if title else f'1d_recall_{param}' 
+            figname = f'_1d_recall_{param}' if algo_name else f'1d_recall_{param}' 
             plt.savefig(f'{figname}.png', bbox_inches='tight')
