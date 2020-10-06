@@ -246,7 +246,7 @@ if __name__ == '__main__':
                          gt_match_indices, op_match_indices, ['dm', 'width', 'toa'], 
                          title=algo_name, save=True, show=inputs.display_plots)
 
-    for param in input.params:
+    for param in inputs.params:
         legend_str=[]
         algo_name = os.path.splitext(file)[0].split('/')[-1]
         legend_str.append(algo_name)
