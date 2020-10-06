@@ -274,4 +274,4 @@ if __name__ == '__main__':
             plt.show()
 
         figname = f'1d_recall_{param}'
-        plt.savefig(f'{figname}.png', bbox_inches='tight')
+        plt.savefig(f'./plots/{figname}.png', bbox_inches='tight')
