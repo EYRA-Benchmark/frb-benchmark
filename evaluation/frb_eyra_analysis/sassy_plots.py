@@ -232,7 +232,7 @@ if __name__ == '__main__':
     if not inputs.display_plots:
         logging.info('Not displaying plots.')
     
-    legend_str=[]
+
     for ii,file in enumerate(inputs.file):
         title = os.path.splitext(file)[0].split('/')[-1]
         legend_str.append(title)
@@ -246,25 +246,31 @@ if __name__ == '__main__':
                          gt_match_indices, op_match_indices, ['dm', 'width', 'toa'], 
                          title=title, save=True, show=inputs.display_plots)
 
-        if inputs.recall_plot:
-            if ii==0:
-                figobj = plt.subplots()
-                plot_truth = True
-            else:
-                plot_truth = False
-            logging.info(f'Generating 1D recall plot for {title}.')
-            for param in inputs.params:
+    for param in input.params:
+        legend_str=[]
+
+        for ii,file in enumerate(inputs.file):
+            df_gt_plot, df_op_plot, gt_match_indices, op_match_indices = manage_input(file)
+
+            if inputs.recall_plot:
+                if ii==0:
+                    figobj = plt.subplots()
+                    plot_truth = True
+                else:
+                    plot_truth = False
+                logging.info(f'Generating 1D recall plot for {title}.')
                 ax1 = recall_1d(df_gt_plot, gt_match_indices, param, 
-                          figobj=figobj, recall_bins=25, 
-                          hist_bins=60, title=title, save=False, show=False, plot_truth=plot_truth, 
-                          sigthresh=inputs.sig_cut)
-#                         show=inputs.display_plots)
+                              figobj=figobj, recall_bins=25, 
+                              hist_bins=60, title=title, save=False, show=False, 
+                              plot_truth=plot_truth, 
+                              sigthresh=inputs.sig_cut)
+    #                         show=inputs.display_plots)
 
-    ax1.legend(legend_str)
+        ax1.legend(legend_str)
 
-    if inputs.display_plots:
-        plt.show()
+        if inputs.display_plots:
+            plt.show()
 
-    if True:
-        figname = f'_1d_recall_{param}' if title else f'1d_recall_{param}' 
-        plt.savefig(f'{figname}.png', bbox_inches='tight')
+        if True:
+            figname = f'_1d_recall_{param}' if title else f'1d_recall_{param}' 
+            plt.savefig(f'{figname}.png', bbox_inches='tight')
