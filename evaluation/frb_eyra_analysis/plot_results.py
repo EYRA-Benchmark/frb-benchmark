@@ -20,8 +20,7 @@ params = {
         }
 matplotlib.rcParams.update(params)
 
-from blind_detection import input_columns, truth_columns, Column
-
+from blind_detection import input_columns, truth_columns, Column, k_DM
 markers = ['o', 'v', '*', 'P', 's', 'x']
 label_name = {'toa': 'Time (s)',
               'dm' : 'DM (pc cm**-3)', 
@@ -123,7 +122,7 @@ def plot_arb_txt(files, fntruth, param1, param2, sizeparam='snr'):
         input_df = pd.read_csv(fn, names=input_columns, comment='#', 
                                delim_whitespace=True, skiprows=1)
         freq_ref_cand = input_df[Column.freq_ref][0]
-        input_df[Column.time] -= 4148 * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
+        input_df[Column.time] -= k_DM * input_df[Column.DM] * (freq_ref_cand ** -2. - freq_ref_truth ** -2.)
 
         plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.55, marker=markers[ii])
         legend_str.append(fn.split('/')[-1])
@@ -143,19 +142,19 @@ def plot_trigger_stats(files, fntruth):
     legend_str = []
     plt.subplot(121)
     plt.hist(truth_df[Column.SN],cumulative=True, bins=100, 
-             histtype='step', normed=True, range=(0,50), lw=2.5,
+             histtype='step', normed=False, range=(0,50), lw=2.5,
              color='k', alpha=.85)
     plt.subplot(122)
-    plt.hist(truth_df[Column.DM],bins=100,normed=True,histtype='step',lw=2.5,color='k',alpha=0.85)
+    plt.hist(truth_df[Column.DM],bins=100,normed=False,histtype='step',lw=2.5,color='k',alpha=0.85)
     legend_str.append('Truth')
     for ii,fn in enumerate(files):
         input_df = pd.read_csv(fn, names=input_columns, comment='#',
                                delim_whitespace=True, skiprows=1)
         freq_ref_cand = input_df[Column.freq_ref][0]
         plt.subplot(121)
-        plt.hist(input_df[Column.SN],cumulative=True, bins=100, histtype='step', normed=True, range=(0,50))
+        plt.hist(input_df[Column.SN],cumulative=True, bins=100, histtype='step', normed=False, range=(0,50))
         plt.subplot(122)
-        plt.hist(input_df[Column.DM],bins=100,normed=True,histtype='step', log=True)
+        plt.hist(input_df[Column.DM],bins=100,normed=False,histtype='step', log=True)
 #        plt.scatter(input_df[x], input_df[y], input_df[msize], alpha=0.25, marker=markers[ii])
         legend_str.append(fn.split('/')[-1])    
 
